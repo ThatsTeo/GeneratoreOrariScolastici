@@ -1,0 +1,572 @@
+@startjson
+<style>
+  .pkg {
+    BackGroundColor #2C3E50
+    FontColor white
+    FontStyle bold
+  }
+  .cls {
+    BackGroundColor #2980B9
+    FontColor white
+    FontStyle bold
+  }
+  .enm {
+    BackGroundColor #8E44AD
+    FontColor white
+    FontStyle bold
+  }
+  .field {
+    BackGroundColor #27AE60
+    FontColor white
+    FontStyle italic
+  }
+  .method {
+    BackGroundColor #E67E22
+    FontColor white
+  }
+  .rel {
+    BackGroundColor #C0392B
+    FontColor white
+    FontStyle bold
+  }
+</style>
+
+#highlight "GeneratoreOrario" <<pkg>>
+
+#highlight "GeneratoreOrario" / "ClassiBasi" <<pkg>>
+
+#highlight "GeneratoreOrario" / "ClassiBasi" / "GiorniSettimana (enum)" <<enm>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "GiorniSettimana (enum)" / "costanti" <<field>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "GiorniSettimana (enum)" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "GiorniSettimana (enum)" / "metodi" <<method>>
+
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Materia" <<cls>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Materia" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Materia" / "metodi" <<method>>
+
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Docente" <<cls>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Docente" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Docente" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Docente" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Classe" <<cls>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Classe" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Classe" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Classe" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Assegnazione" <<cls>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Assegnazione" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Assegnazione" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Assegnazione" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Lezione" <<cls>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Lezione" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Lezione" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Lezione" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Tuple<T1, T2, T3>" <<cls>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Tuple<T1, T2, T3>" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Tuple<T1, T2, T3>" / "metodi" <<method>>
+
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Scuola" <<cls>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Scuola" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Scuola" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Scuola" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "Generatori" <<pkg>>
+
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioScuola" <<cls>>
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioScuola" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioScuola" / "metodi pubblici" <<method>>
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioScuola" / "metodi privati" <<method>>
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioScuola" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioClasse" <<cls>>
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioClasse" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioClasse" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioClasse" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioDocente" <<cls>>
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioDocente" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioDocente" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioDocente" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "Parser" <<pkg>>
+
+#highlight "GeneratoreOrario" / "Parser" / "ParserCSV" <<cls>>
+#highlight "GeneratoreOrario" / "Parser" / "ParserCSV" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "Parser" / "ParserCSV" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "Parser" / "ParserCSV" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "Parser" / "EsportatoreCSV" <<cls>>
+#highlight "GeneratoreOrario" / "Parser" / "EsportatoreCSV" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "Parser" / "EsportatoreCSV" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "GUI" <<pkg>>
+
+#highlight "GeneratoreOrario" / "GUI" / "GeneratoreApplication" <<cls>>
+#highlight "GeneratoreOrario" / "GUI" / "GeneratoreApplication" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "GUI" / "GeneratoreApplication" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "GUI" / "Launcher" <<cls>>
+#highlight "GeneratoreOrario" / "GUI" / "Launcher" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "GUI" / "Launcher" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "GUI" / "MainController" <<cls>>
+#highlight "GeneratoreOrario" / "GUI" / "MainController" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "GUI" / "MainController" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "GUI" / "MainController" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "GUI" / "OrarioController" <<cls>>
+#highlight "GeneratoreOrario" / "GUI" / "OrarioController" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "GUI" / "OrarioController" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "GUI" / "OrarioController" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "GUI" / "OrarioClassiController" <<cls>>
+#highlight "GeneratoreOrario" / "GUI" / "OrarioClassiController" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "GUI" / "OrarioClassiController" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "GUI" / "OrarioClassiController" / "relazioni" <<rel>>
+
+#highlight "GeneratoreOrario" / "GUI" / "VincoliController" <<cls>>
+#highlight "GeneratoreOrario" / "GUI" / "VincoliController" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "GUI" / "VincoliController" / "metodi" <<method>>
+#highlight "GeneratoreOrario" / "GUI" / "VincoliController" / "relazioni" <<rel>>
+
+{
+  "GeneratoreOrario": {
+
+    "ClassiBasi": {
+
+      "GiorniSettimana (enum)": {
+        "costanti": ["LUNEDI", "MARTEDI", "MERCOLEDI", "GIOVEDI", "VENERDI", "SABATO", "DOMENICA"],
+        "campi": {
+          "- nome": "String",
+          "+ GIORNI_SCOLASTICI": "int = 5",
+          "+ ORE_AL_GIORNO": "int = 6"
+        },
+        "metodi": [
+          "+ getNome(): String"
+        ]
+      },
+
+      "Materia": {
+        "campi": {
+          "- nomeMateria": "String"
+        },
+        "metodi": [
+          "+ Materia(nomeMateria: String)",
+          "+ getNomeMateria(): String",
+          "+ setNomeMateria(nomeMateria: String): void",
+          "+ equals(o: Object): boolean",
+          "+ hashCode(): int",
+          "+ toString(): String"
+        ]
+      },
+
+      "Docente": {
+        "campi": {
+          "- nomeCognome": "String",
+          "- assegnazioni": "List<Assegnazione>",
+          "- giorniLiberi": "Set<GiorniSettimana>"
+        },
+        "metodi": [
+          "+ Docente(nomeCognome: String)",
+          "+ aggiungiAssegnazione(assegnazione: Assegnazione): void",
+          "+ aggiungiAssegnazione(classe: Classe, materia: Materia, ore: int): void",
+          "+ getOreTotali(): int",
+          "+ getNomeCognome(): String",
+          "+ setNomeCognome(nomeCognome: String): void",
+          "+ getAssegnazioni(): List<Assegnazione>",
+          "+ getGiorniLiberi(): Set<GiorniSettimana>",
+          "+ setGiorniLiberi(giorniLiberi: Set<GiorniSettimana>): void",
+          "+ aggiungiGiornoLibero(giorno: GiorniSettimana): void",
+          "+ equals(o: Object): boolean",
+          "+ hashCode(): int",
+          "+ toString(): String"
+        ],
+        "relazioni": {
+          "--> Assegnazione": "* assegnazioni",
+          "--> GiorniSettimana": "* giorniLiberi"
+        }
+      },
+
+      "Classe": {
+        "campi": {
+          "- anno": "int",
+          "- sezione": "char",
+          "- indirizzo": "String",
+          "- docenti": "List<Docente>",
+          "- assegnazioni": "List<Assegnazione>",
+          "- materieOre": "Map<Materia, Integer>",
+          "- tabellaLezioni": "Lezione[][]"
+        },
+        "metodi": [
+          "+ Classe(anno: int, sezione: char, indirizzo: String)",
+          "+ getNomeCompleto(): String",
+          "+ aggiungiDocente(docente: Docente): void",
+          "+ aggiungiAssegnazione(assegnazione: Assegnazione): void",
+          "+ aggiungiMateriaOre(materia: Materia, ore: int): void",
+          "+ getTotaleOrePreviste(): int",
+          "+ getAnno(): int",
+          "+ getSezione(): char",
+          "+ getIndirizzo(): String",
+          "+ getDocenti(): List<Docente>",
+          "+ getAssegnazioni(): List<Assegnazione>",
+          "+ getMaterieOre(): Map<Materia, Integer>",
+          "+ getTabellaLezioni(): Lezione[][]",
+          "+ setTabellaLezioni(tabellaLezioni: Lezione[][]): void",
+          "+ equals(o: Object): boolean",
+          "+ hashCode(): int",
+          "+ toString(): String"
+        ],
+        "relazioni": {
+          "--> Docente": "* docenti",
+          "--> Assegnazione": "* assegnazioni",
+          "--> Materia": "* materieOre (chiave)",
+          "--> Lezione": "* tabellaLezioni"
+        }
+      },
+
+      "Assegnazione": {
+        "campi": {
+          "- docente": "Docente",
+          "- classe": "Classe",
+          "- materia": "Materia",
+          "- oreSettimanali": "int"
+        },
+        "metodi": [
+          "+ Assegnazione(docente: Docente, classe: Classe, materia: Materia, oreSettimanali: int)",
+          "+ getDocente(): Docente",
+          "+ setDocente(docente: Docente): void",
+          "+ getClasse(): Classe",
+          "+ setClasse(classe: Classe): void",
+          "+ getMateria(): Materia",
+          "+ setMateria(materia: Materia): void",
+          "+ getOreSettimanali(): int",
+          "+ setOreSettimanali(oreSettimanali: int): void",
+          "+ toString(): String"
+        ],
+        "relazioni": {
+          "--> Docente": "1 docente",
+          "--> Classe": "1 classe",
+          "--> Materia": "1 materia"
+        }
+      },
+
+      "Lezione": {
+        "campi": {
+          "- docenti": "List<Docente>",
+          "- materia": "Materia",
+          "- classe": "Classe"
+        },
+        "metodi": [
+          "+ Lezione(docente: Docente, materia: Materia, classe: Classe)",
+          "+ Lezione(docenti: List<Docente>, materia: Materia, classe: Classe)",
+          "+ getDocenti(): List<Docente>",
+          "+ getDocente(): Docente",
+          "+ getMateria(): Materia",
+          "+ setMateria(materia: Materia): void",
+          "+ getClasse(): Classe",
+          "+ setClasse(classe: Classe): void",
+          "+ toString(): String"
+        ],
+        "relazioni": {
+          "--> Docente": "* docenti",
+          "--> Materia": "1 materia",
+          "--> Classe": "1 classe"
+        }
+      },
+
+      "Tuple<T1, T2, T3>": {
+        "campi": {
+          "- t1": "T1",
+          "- t2": "T2",
+          "- t3": "T3"
+        },
+        "metodi": [
+          "+ Tuple(t1: T1, t2: T2, t3: T3)",
+          "+ getT1(): T1",
+          "+ setT1(t1: T1): void",
+          "+ getT2(): T2",
+          "+ setT2(t2: T2): void",
+          "+ getT3(): T3",
+          "+ setT3(t3: T3): void",
+          "+ equals(o: Object): boolean",
+          "+ hashCode(): int",
+          "+ toString(): String"
+        ]
+      },
+
+      "Scuola": {
+        "campi": {
+          "- nome": "String",
+          "- docenti": "Map<String, Docente>",
+          "- classi": "Map<String, Classe>",
+          "- assegnazioni": "List<Assegnazione>"
+        },
+        "metodi": [
+          "+ Scuola()",
+          "+ Scuola(nome: String)",
+          "+ getOCreaDocente(nomeCognome: String): Docente",
+          "+ getOCreaClasse(anno: int, sezione: char, indirizzo: String): Classe",
+          "+ aggiungiAssegnazione(assegnazione: Assegnazione): void",
+          "+ getTotaleOrePreviste(): int",
+          "+ getNome(): String",
+          "+ getDocenti(): Map<String, Docente>",
+          "+ getClassi(): Map<String, Classe>",
+          "+ getAssegnazioni(): List<Assegnazione>",
+          "+ getTutteLeClassi(): Collection<Classe>",
+          "+ getTuttiIDocenti(): Collection<Docente>"
+        ],
+        "relazioni": {
+          "o-- Docente": "* docenti (aggregazione)",
+          "o-- Classe": "* classi (aggregazione)",
+          "o-- Assegnazione": "* assegnazioni (aggregazione)"
+        }
+      }
+    },
+
+    "Generatori": {
+
+      "GeneratoreOrarioScuola": {
+        "campi": {
+          "- MAX_TENTATIVI": "int = 200 (static final)",
+          "- MAX_SCAMBI": "int = 20000 (static final)",
+          "- scuola": "Scuola (final)",
+          "- giorni": "int (final)",
+          "- ore": "int (final)",
+          "- TUTTI": "int (final)",
+          "- rand": "Random (final)",
+          "- bitDoc": "Map<Docente, Integer>",
+          "- bitLiberi": "Map<Docente, Integer>",
+          "- bitCla": "Map<Classe, Integer>",
+          "- orari": "Map<Classe, Lezione[][][]>"
+        },
+        "metodi pubblici": [
+          "+ GeneratoreOrarioScuola(scuola: Scuola)",
+          "+ generaOrario(): boolean",
+          "+ estraiOrarioDocente(docente: Docente): Lezione[][]",
+          "+ verificaConflitti(): List<String>",
+          "+ stampaOrarioClasse(classe: Classe): void [static]",
+          "+ stampaOrarioDocente(docente: Docente): void"
+        ],
+        "metodi privati": [
+          "- bit(o: int, g: int): int",
+          "- liberi(r: Req): int",
+          "- casuale(bits: int): int[]",
+          "- tutti(bits: int): List<int[]>",
+          "- assegna(r: Req, o: int, g: int): void",
+          "- rimuovi(cl: Classe, o: int, g: int): Req",
+          "- tentativo(gruppi: List<Gruppo>): int",
+          "- identificaGruppi(): List<Gruppo>",
+          "- trovaLezioneDocente(doc: Docente, o: int, g: int): Lezione",
+          "- copiaOrari(): Map<Classe, Lezione[][][]>",
+          "- copiaFinale(): void"
+        ],
+        "relazioni": {
+          "--> Scuola": "1 scuola",
+          "..> Lezione": "crea / gestisce",
+          "..> Docente": "usa",
+          "..> Classe": "usa",
+          "..> Assegnazione": "usa",
+          "..> GiorniSettimana": "usa"
+        }
+      },
+
+      "GeneratoreOrarioClasse": {
+        "campi": {
+          "- classe": "Classe (final)"
+        },
+        "metodi": [
+          "+ GeneratoreOrarioClasse(classe: Classe)",
+          "+ getOrario(): Lezione[][]",
+          "+ stampaOrario(): void",
+          "+ getClasse(): Classe"
+        ],
+        "relazioni": {
+          "--> Classe": "1 classe",
+          "..> GeneratoreOrarioScuola": "chiama stampaOrarioClasse"
+        }
+      },
+
+      "GeneratoreOrarioDocente": {
+        "campi": {
+          "- docente": "Docente (final)",
+          "- generatoreScuola": "GeneratoreOrarioScuola (final)"
+        },
+        "metodi": [
+          "+ GeneratoreOrarioDocente(docente: Docente, generatoreScuola: GeneratoreOrarioScuola)",
+          "+ getOrario(): Lezione[][]",
+          "+ stampaOrario(): void",
+          "+ getDocente(): Docente"
+        ],
+        "relazioni": {
+          "--> Docente": "1 docente",
+          "--> GeneratoreOrarioScuola": "1 generatoreScuola"
+        }
+      }
+    },
+
+    "Parser": {
+
+      "ParserCSV": {
+        "campi": {
+          "+ fileCSV": "File (static)",
+          "+ datiFile": "List<String[]> (static)",
+          "+ errori": "List<String> (static)",
+          "+ avvisi": "List<String> (static)"
+        },
+        "metodi": [
+          "+ parse(): List<String[]> [static]",
+          "+ getDocenti(): ArrayList<String> [static]",
+          "+ costruisciScuola(): Scuola"
+        ],
+        "relazioni": {
+          "..> Scuola": "costruisce",
+          "..> Docente": "crea",
+          "..> Classe": "crea",
+          "..> Materia": "crea",
+          "..> Assegnazione": "crea",
+          "..> GiorniSettimana": "usa"
+        }
+      },
+
+      "EsportatoreCSV": {
+        "metodi": [
+          "+ esportaOrarioClassi(classi: Collection<Classe>, file: File): boolean [static]",
+          "+ esportaOrarioDocenti(docenti: Collection<Docente>, gen: GeneratoreOrarioScuola, file: File): boolean [static]"
+        ],
+        "relazioni": {
+          "..> Classe": "usa",
+          "..> Docente": "usa",
+          "..> Lezione": "usa",
+          "..> GiorniSettimana": "usa",
+          "..> GeneratoreOrarioScuola": "usa"
+        }
+      }
+    },
+
+    "GUI": {
+
+      "GeneratoreApplication": {
+        "metodi": [
+          "+ start(stage: Stage): void"
+        ],
+        "relazioni": {
+          "--|> Application": "extends javafx.application.Application"
+        }
+      },
+
+      "Launcher": {
+        "metodi": [
+          "+ main(args: String[]): void [static]"
+        ],
+        "relazioni": {
+          "..> GeneratoreApplication": "avvia"
+        }
+      },
+
+      "MainController": {
+        "campi": {
+          "~ parser": "ParserCSV",
+          "~ saraceno": "Scuola",
+          "~ romegialli": "Scuola",
+          "~ generatoreSaraceno": "GeneratoreOrarioScuola",
+          "~ generatoreRomegialli": "GeneratoreOrarioScuola",
+          "~ fileName": "Label (@FXML)",
+          "~ titoloPrincipale": "Label (@FXML)",
+          "~ profScelto": "Label (@FXML)",
+          "~ tabellaIniziale": "TableView<List<String>> (@FXML)",
+          "~ comboBoxDocenti": "ComboBox<String> (@FXML)"
+        },
+        "metodi": [
+          "~ inizializzaComboboxDocenti(): void",
+          "~ onOpenFilePicker(event: ActionEvent): void",
+          "~ finestraVincoli(event: ActionEvent): void",
+          "~ finestraOrariDocenti(event: ActionEvent): void",
+          "~ finestraOrariClassi(event: ActionEvent): void"
+        ],
+        "relazioni": {
+          "--> ParserCSV": "1 parser",
+          "--> Scuola": "2 saraceno, romegialli",
+          "--> GeneratoreOrarioScuola": "2 generatoreSaraceno, generatoreRomegialli",
+          "..> VincoliController": "apre finestra",
+          "..> OrarioController": "apre finestra",
+          "..> OrarioClassiController": "apre finestra"
+        }
+      },
+
+      "OrarioController": {
+        "campi": {
+          "- labelOrario": "Label (@FXML)",
+          "- comboBoxDocenti": "ComboBox<String> (@FXML)",
+          "- grigliaOrario": "GridPane (@FXML)",
+          "- generatore": "GeneratoreOrarioScuola",
+          "- scuola": "Scuola"
+        },
+        "metodi": [
+          "~ initialize(): void",
+          "+ setDati(gen: GeneratoreOrarioScuola, scuola: Scuola, docInit: String): void",
+          "+ setDocente(docente: String): void",
+          "- mostraOrarioDocente(docente: Docente): void",
+          "- getClasseStileMateria(nomeMateria: String): String"
+        ],
+        "relazioni": {
+          "--> GeneratoreOrarioScuola": "1 generatore",
+          "--> Scuola": "1 scuola",
+          "..> Docente": "usa",
+          "..> Lezione": "usa",
+          "..> GiorniSettimana": "usa"
+        }
+      },
+
+      "OrarioClassiController": {
+        "campi": {
+          "- labelOrario": "Label (@FXML)",
+          "- comboBoxClassi": "ComboBox<String> (@FXML)",
+          "- grigliaOrario": "GridPane (@FXML)",
+          "- scuola": "Scuola"
+        },
+        "metodi": [
+          "~ initialize(): void",
+          "+ setDati(scuola: Scuola, classeIniziale: String): void",
+          "- mostraOrarioClasse(classe: Classe): void",
+          "- getClasseStileMateria(nomeMateria: String): String"
+        ],
+        "relazioni": {
+          "--> Scuola": "1 scuola",
+          "..> Classe": "usa",
+          "..> Docente": "usa",
+          "..> Lezione": "usa",
+          "..> GiorniSettimana": "usa"
+        }
+      },
+
+      "VincoliController": {
+        "campi": {
+          "- labelVincoli": "Label (@FXML)",
+          "- primaOra": "Label (@FXML)",
+          "- ultimaOra": "Label (@FXML)",
+          "- primaOraCheck": "CheckBox (@FXML)",
+          "- ultimaOraCheck": "CheckBox (@FXML)",
+          "- oreCons": "Label (@FXML)",
+          "- oreConsecSlider": "Spinner<Integer> (@FXML)",
+          "- oreConsMax": "Label (@FXML)",
+          "- oreConsMaxSpinner": "Spinner<Integer> (@FXML)",
+          "- maxOreGiornoLabel": "Label (@FXML)",
+          "- maxOreGiornoCB": "ComboBox<GiorniSettimana> (@FXML)",
+          "- maxOreGiornoSpinner": "Spinner<Integer> (@FXML)"
+        },
+        "metodi": [
+          "~ initialize(): void",
+          "+ setDocente(docente: String): void",
+          "~ onChiudi(event: ActionEvent): void"
+        ],
+        "relazioni": {
+          "..> GiorniSettimana": "usa"
+        }
+      }
+    }
+  }
+}
+@endjson
