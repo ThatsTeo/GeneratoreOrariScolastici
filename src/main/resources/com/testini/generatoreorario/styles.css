@@ -173,3 +173,60 @@
     -fx-border-color: #2e3238;
     -fx-border-radius: 5px;
 }
+
+/*  VincoliView */
+.vincoli-card {
+    -fx-background-color: #36393f;
+    -fx-background-radius: 8px;
+    -fx-border-color: #484b51;
+    -fx-border-radius: 8px;
+    -fx-padding: 12px 16px;
+}
+
+.vincoli-sezione {
+    -fx-text-fill: #b9bbbe;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.vincoli-label {
+    -fx-text-fill: #f2f2f2;
+    -fx-font-size: 13px;
+}
+
+.vincoli-root .check-box .box {
+    -fx-background-color: #22252a;
+    -fx-border-color: #585d66;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.vincoli-root .check-box:selected .box {
+    -fx-background-color: #27ae60;
+    -fx-border-color: #2ecc71;
+}
+
+.vincoli-root .check-box:selected .mark {
+    -fx-background-color: white;
+}
+
+.vincoli-root .spinner, .vincoli-root .combo-box {
+    -fx-background-color: #2b2b2b;
+    -fx-border-color: #585d66;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.vincoli-root .spinner .text-field, .vincoli-root .combo-box .list-cell {
+    -fx-background-color: #2b2b2b;
+    -fx-text-fill: white;
+}
+
+.vincoli-root .combo-box-popup .list-view {
+    -fx-background-color: #36393f;
+    -fx-border-color: #585d66;
+}
+
+.vincoli-root .combo-box-popup .list-cell:hover {
+    -fx-background-color: #434850;
+}

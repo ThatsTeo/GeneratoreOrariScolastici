@@ -7,6 +7,11 @@ public class Docente {
     private String nomeCognome;
     private List<Assegnazione> assegnazioni;
     private Set<GiorniSettimana> giorniLiberi;
+    private boolean puoPrimaOra = true;
+    private boolean puoUltimaOra = true;
+    private int oreMinConsecutive = 1;
+    private int oreMaxConsecutive = GiorniSettimana.ORE_AL_GIORNO;
+    private Map<GiorniSettimana, Integer> maxOreGiorno = new EnumMap<>(GiorniSettimana.class);
 
     public Docente(String nomeCognome) {
         this.nomeCognome = nomeCognome;
@@ -54,6 +59,26 @@ public class Docente {
 
     public void aggiungiGiornoLibero(GiorniSettimana giorno) {
         this.giorniLiberi.add(giorno);
+    }
+
+    public boolean isPuoPrimaOra() { return puoPrimaOra; }
+    public void setPuoPrimaOra(boolean puoPrimaOra) { this.puoPrimaOra = puoPrimaOra; }
+
+    public boolean isPuoUltimaOra() { return puoUltimaOra; }
+    public void setPuoUltimaOra(boolean puoUltimaOra) { this.puoUltimaOra = puoUltimaOra; }
+
+    public int getOreMinConsecutive() { return oreMinConsecutive; }
+    public void setOreMinConsecutive(int oreMinConsecutive) { this.oreMinConsecutive = oreMinConsecutive; }
+
+    public int getOreMaxConsecutive() { return oreMaxConsecutive; }
+    public void setOreMaxConsecutive(int oreMaxConsecutive) { this.oreMaxConsecutive = oreMaxConsecutive; }
+
+    public int getMaxOreGiorno(GiorniSettimana g) {
+        return maxOreGiorno.getOrDefault(g, GiorniSettimana.ORE_AL_GIORNO);
+    }
+
+    public void setMaxOreGiorno(Map<GiorniSettimana, Integer> maxOreGiorno) {
+        this.maxOreGiorno = new EnumMap<>(maxOreGiorno);
     }
 
     @Override

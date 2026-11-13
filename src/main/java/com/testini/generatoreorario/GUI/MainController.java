@@ -102,11 +102,11 @@ public class MainController {
             Parent root = loader.load();
 
             VincoliController controller = loader.getController();
-            controller.setDocente(comboBoxDocenti.getValue());
+            controller.setDocente(saraceno.getOCreaDocente(comboBoxDocenti.getValue()), () -> this.generatoreSaraceno = null);
 
             Stage stage = new Stage();
             stage.setTitle("Vincoli");
-            stage.setScene(new Scene(root, 460, 360));
+            stage.setScene(new Scene(root, 460, 400));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

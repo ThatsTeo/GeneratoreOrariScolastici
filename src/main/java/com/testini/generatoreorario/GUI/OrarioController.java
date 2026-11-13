@@ -67,7 +67,7 @@ public class OrarioController {
 
         String[] giorni = {"Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì"};
 
-        // Cella intestazione ORA
+        // Cella intestazione
         Label lblOraH = new Label("Ora");
         lblOraH.getStyleClass().add("cella-header");
         lblOraH.setPrefSize(70, 35);
@@ -83,7 +83,7 @@ public class OrarioController {
             grigliaOrario.add(lblG, g + 1, 0);
         }
 
-        // Estrazione matrice lezioni [6][5] dal generatore del backend
+        // Estrazione lezioni dal generatore del backend
         Lezione[][] orario = generatore.estraiOrarioDocente(docente);
 
         for (int o = 0; o < GiorniSettimana.ORE_AL_GIORNO; o++) {

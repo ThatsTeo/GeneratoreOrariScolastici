@@ -30,12 +30,56 @@ public class GeneratoreOrarioScuola {
         return 1 << (g * ore + o);
     }
 
+    private int vietati(Docente d) {
+        int occ = bitDoc.getOrDefault(d, 0);
+        int v = occ | bitLiberi.getOrDefault(d, 0);
+        int maxCons = d.getOreMaxConsecutive();
+        int maskG = (1 << ore) - 1;
+        for (int g = 0; g < giorni; g++) {
+            int day = (occ >> (g * ore)) & maskG;
+            if (Integer.bitCount(day) >= d.getMaxOreGiorno(GiorniSettimana.values()[g])) {
+                v |= maskG << (g * ore);
+            } else if (maxCons < ore) {
+                for (int o = 0; o < ore; o++) {
+                    if ((day & (1 << o)) == 0 && maxConsecutive(day | (1 << o)) > maxCons) {
+                        v |= bit(o, g);
+                    }
+                }
+            }
+        }
+        return v;
+    }
+
+    private int maxConsecutive(int day) {
+        int max = 0, cur = 0;
+        for (int o = 0; o < ore; o++) {
+            cur = ((day & (1 << o)) != 0) ? cur + 1 : 0;
+            if (cur > max) max = cur;
+        }
+        return max;
+    }
+
     private int liberi(Req r) {
         int occ = bitCla.getOrDefault(r.cl, 0);
         for (Docente d: r.doc) {
-            occ |= bitDoc.getOrDefault(d, 0) | bitLiberi.getOrDefault(d, 0);
+            occ |= vietati(d);
         }
         return ~occ & TUTTI;
+    }
+
+    private int[] scegliSlot(Req r, int bits) {
+        int adj = 0, maskG = (1 << ore) - 1;
+        for (Docente d : r.doc) {
+            if (d.getOreMinConsecutive() > 1) {
+                int occ = bitDoc.getOrDefault(d, 0);
+                for (int g = 0; g < giorni; g++) {
+                    int day = (occ >> (g * ore)) & maskG;
+                    adj |= (((day << 1) | (day >> 1)) & maskG) << (g * ore);
+                }
+            }
+        }
+        int pref = bits & adj;
+        return casuale(pref != 0 ? pref : bits);
     }
 
     private int[] casuale(int bits) {
@@ -86,7 +130,7 @@ public class GeneratoreOrarioScuola {
         return new Req(doc, cl, lez[0].getMateria());
     }
 
-    public boolean generaOrario() {
+    public void generaOrario() {
         List<Gruppo> gruppi = identificaGruppi();
         int obiettivo = gruppi.stream().mapToInt(Gruppo::ore).sum();
         for (Docente d: scuola.getTuttiIDocenti()) {
@@ -95,17 +139,19 @@ public class GeneratoreOrarioScuola {
             }
         }
 
-        int best = 0;
+        int best = -1, bestPen = Integer.MAX_VALUE;
         Map<Classe, Lezione[][][]> bestOrario = null;
 
         for (int t = 0; t < MAX_TENTATIVI; t++) {
             int p = tentativo(gruppi);
-            if (p >= obiettivo) {
+            int pen = (p >= obiettivo) ? penalitaMinCons() : Integer.MAX_VALUE;
+            if (p >= obiettivo && pen == 0) {
                 copiaFinale();
-                return true;
+                return;
             }
-            if (p > best) {
+            if (p > best || (p == best && pen < bestPen)) {
                 best = p;
+                bestPen = pen;
                 bestOrario = copiaOrari();
             }
         }
@@ -114,7 +160,6 @@ public class GeneratoreOrarioScuola {
             orari = bestOrario;
             copiaFinale();
         }
-        return best >= obiettivo;
     }
 
     private int tentativo(List<Gruppo> gruppi) {
@@ -141,6 +186,12 @@ public class GeneratoreOrarioScuola {
                     }
                 }
             }
+            if (!d.isPuoPrimaOra()) {
+                for (int g = 0; g < giorni; g++) m |= bit(0, g);
+            }
+            if (!d.isPuoUltimaOra()) {
+                for (int g = 0; g < giorni; g++) m |= bit(ore - 1, g);
+            }
             bitLiberi.put(d, m);
         }
 
@@ -158,7 +209,7 @@ public class GeneratoreOrarioScuola {
         for (Req r: richieste) {
             int l = liberi(r);
             if (l != 0) {
-                int[] s = casuale(l);
+                int[] s = scegliSlot(r, l);
                 assegna(r, s[0], s[1]);
                 piazzati++;
             } else {
@@ -170,7 +221,7 @@ public class GeneratoreOrarioScuola {
             Req r = fallite.get(rand.nextInt(fallite.size()));
             int docViet = 0;
             for (Docente d: r.doc) {
-                docViet |= bitDoc.getOrDefault(d, 0) | bitLiberi.getOrDefault(d, 0);
+                docViet |= vietati(d);
             }
             int cand = bitCla.getOrDefault(r.cl, 0) & ~docViet & TUTTI;
             List<int[]> slots = tutti(cand);
@@ -229,6 +280,28 @@ public class GeneratoreOrarioScuola {
             }
         }
         return piazzati;
+    }
+
+    private int penalitaMinCons() {
+        int pen = 0, maskG = (1 << ore) - 1;
+        for (Docente d : scuola.getTuttiIDocenti()) {
+            int minC = d.getOreMinConsecutive();
+            if (minC <= 1) continue;
+            int occ = bitDoc.getOrDefault(d, 0);
+            for (int g = 0; g < giorni; g++) {
+                int day = (occ >> (g * ore)) & maskG;
+                int run = 0;
+                for (int o = 0; o <= ore; o++) {
+                    if (o < ore && (day & (1 << o)) != 0) {
+                        run++;
+                    } else if (run > 0) {
+                        if (run < minC) pen += (minC - run);
+                        run = 0;
+                    }
+                }
+            }
+        }
+        return pen;
     }
 
     private List<Gruppo> identificaGruppi() {
@@ -330,86 +403,5 @@ public class GeneratoreOrarioScuola {
             }
         }
         return od;
-    }
-
-    public List<String> verificaConflitti() {
-        List<String> err = new ArrayList<>();
-        for (Docente d: scuola.getTuttiIDocenti()) {
-            for (int o = 0; o < ore; o++) {
-                for (int g = 0; g < giorni; g++) {
-                    List<Classe> cl = new ArrayList<>();
-                    for (Classe c: scuola.getTutteLeClassi()) {
-                        Lezione[][][] or = orari.get(c);
-                        if (or != null && or[o][g] != null) {
-                            for (Lezione l: or[o][g]) {
-                                if (l.getDocente().equals(d)) {
-                                    cl.add(c);
-                                }
-                            }
-                        }
-                    }
-                    if (cl.size() > 1) {
-                        err.add("CONFLITTO: " + d.getNomeCognome() + " in più classi il " + GiorniSettimana.values()[g].getNome() + " alla " + (o + 1) + "° ora: " + cl);
-                    }
-                }
-            }
-        }
-        return err;
-    }
-
-    public static void stampaOrarioClasse(Classe classe) {
-        System.out.println("\n===== ORARIO CLASSE " + classe.getNomeCompleto() + " =====");
-        Lezione[][] or = classe.getTabellaLezioni();
-        if (or == null) {
-            System.out.println("  (nessun orario generato)");
-            return;
-        }
-
-        System.out.printf("%-6s", "Ora");
-        for (int g = 0; g < GiorniSettimana.GIORNI_SCOLASTICI; g++) {
-            System.out.printf("| %-25s", GiorniSettimana.values()[g].getNome());
-        }
-        System.out.println();
-        System.out.println("-".repeat(6 + (28 * GiorniSettimana.GIORNI_SCOLASTICI)));
-
-        for (int o = 0; o < GiorniSettimana.ORE_AL_GIORNO; o++) {
-            System.out.printf("%-6s", (o + 1) + "°");
-            for (int g = 0; g < GiorniSettimana.GIORNI_SCOLASTICI; g++) {
-                Lezione l = or[o][g];
-                String t = (l != null) ? l.toString() : "---";
-                if (t.length() > 24) {
-                    t = t.substring(0, 24);
-                }
-                System.out.printf("| %-25s", t);
-            }
-            System.out.println();
-        }
-    }
-
-    public void stampaOrarioDocente(Docente docente) {
-        System.out.println("\n===== ORARIO DOCENTE " + docente.getNomeCognome() + " =====");
-        Lezione[][] or = estraiOrarioDocente(docente);
-
-        System.out.printf("%-6s", "Ora");
-        for (int g = 0; g < giorni; g++) {
-            System.out.printf("| %-30s", GiorniSettimana.values()[g].getNome());
-        }
-        System.out.println();
-        System.out.println("-".repeat(6 + (33 * giorni)));
-
-        for (int o = 0; o < ore; o++) {
-            System.out.printf("%-6s", (o + 1) + "°");
-            for (int g = 0; g < giorni; g++) {
-                Lezione l = or[o][g];
-                String t = (l != null)
-                        ? l.getMateria().getNomeMateria() + " (" + l.getClasse().getNomeCompleto() + ")"
-                        : "---";
-                if (t.length() > 29) {
-                    t = t.substring(0, 29);
-                }
-                System.out.printf("| %-30s", t);
-            }
-            System.out.println();
-        }
     }
 }

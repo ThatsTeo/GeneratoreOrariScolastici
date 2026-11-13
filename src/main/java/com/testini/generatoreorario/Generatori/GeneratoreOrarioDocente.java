@@ -17,10 +17,6 @@ public class GeneratoreOrarioDocente {
         return generatoreScuola.estraiOrarioDocente(docente);
     }
 
-    // Stampa su console l'orario del docente
-    public void stampaOrario() {
-        generatoreScuola.stampaOrarioDocente(docente);
-    }
 
     public Docente getDocente() {
         return docente;

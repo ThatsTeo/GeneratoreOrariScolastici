@@ -38,15 +38,6 @@ public class Scuola {
         assegnazione.getClasse().aggiungiAssegnazione(assegnazione);
     }
 
-    // Calcola il totale complessivo delle ore richieste da tutte le classi
-    public int getTotaleOrePreviste() {
-        return assegnazioni.stream().mapToInt(Assegnazione::getOreSettimanali).sum();
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
     public Map<String, Docente> getDocenti() {
         return docenti;
     }

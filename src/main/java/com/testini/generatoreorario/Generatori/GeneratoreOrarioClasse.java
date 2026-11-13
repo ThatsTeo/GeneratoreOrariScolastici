@@ -15,11 +15,6 @@ public class GeneratoreOrarioClasse {
         return classe.getTabellaLezioni();
     }
 
-    // Stampa su console l'orario della classe
-    public void stampaOrario() {
-        GeneratoreOrarioScuola.stampaOrarioClasse(classe);
-    }
-
     public Classe getClasse() {
         return classe;
     }
