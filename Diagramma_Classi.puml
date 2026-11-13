@@ -32,101 +32,78 @@
 </style>
 
 #highlight "GeneratoreOrario" <<pkg>>
-
 #highlight "GeneratoreOrario" / "ClassiBasi" <<pkg>>
-
 #highlight "GeneratoreOrario" / "ClassiBasi" / "GiorniSettimana (enum)" <<enm>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "GiorniSettimana (enum)" / "costanti" <<field>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "GiorniSettimana (enum)" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "GiorniSettimana (enum)" / "metodi" <<method>>
-
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Materia" <<cls>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Materia" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Materia" / "metodi" <<method>>
-
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Docente" <<cls>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Docente" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Docente" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Docente" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Classe" <<cls>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Classe" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Classe" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Classe" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Assegnazione" <<cls>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Assegnazione" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Assegnazione" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Assegnazione" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Lezione" <<cls>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Lezione" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Lezione" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Lezione" / "relazioni" <<rel>>
-
-#highlight "GeneratoreOrario" / "ClassiBasi" / "Tuple<T1, T2, T3>" <<cls>>
-#highlight "GeneratoreOrario" / "ClassiBasi" / "Tuple<T1, T2, T3>" / "campi" <<field>>
-#highlight "GeneratoreOrario" / "ClassiBasi" / "Tuple<T1, T2, T3>" / "metodi" <<method>>
-
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Tuple (T1, T2, T3)" <<cls>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Tuple (T1, T2, T3)" / "campi" <<field>>
+#highlight "GeneratoreOrario" / "ClassiBasi" / "Tuple (T1, T2, T3)" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Scuola" <<cls>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Scuola" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Scuola" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "ClassiBasi" / "Scuola" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "Generatori" <<pkg>>
-
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioScuola" <<cls>>
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioScuola" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioScuola" / "metodi pubblici" <<method>>
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioScuola" / "metodi privati" <<method>>
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioScuola" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioClasse" <<cls>>
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioClasse" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioClasse" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioClasse" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioDocente" <<cls>>
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioDocente" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioDocente" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "Generatori" / "GeneratoreOrarioDocente" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "Parser" <<pkg>>
-
 #highlight "GeneratoreOrario" / "Parser" / "ParserCSV" <<cls>>
 #highlight "GeneratoreOrario" / "Parser" / "ParserCSV" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "Parser" / "ParserCSV" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "Parser" / "ParserCSV" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "Parser" / "EsportatoreCSV" <<cls>>
 #highlight "GeneratoreOrario" / "Parser" / "EsportatoreCSV" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "Parser" / "EsportatoreCSV" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "GUI" <<pkg>>
-
 #highlight "GeneratoreOrario" / "GUI" / "GeneratoreApplication" <<cls>>
 #highlight "GeneratoreOrario" / "GUI" / "GeneratoreApplication" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "GUI" / "GeneratoreApplication" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "GUI" / "Launcher" <<cls>>
 #highlight "GeneratoreOrario" / "GUI" / "Launcher" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "GUI" / "Launcher" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "GUI" / "MainController" <<cls>>
 #highlight "GeneratoreOrario" / "GUI" / "MainController" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "GUI" / "MainController" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "GUI" / "MainController" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "GUI" / "OrarioController" <<cls>>
 #highlight "GeneratoreOrario" / "GUI" / "OrarioController" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "GUI" / "OrarioController" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "GUI" / "OrarioController" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "GUI" / "OrarioClassiController" <<cls>>
 #highlight "GeneratoreOrario" / "GUI" / "OrarioClassiController" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "GUI" / "OrarioClassiController" / "metodi" <<method>>
 #highlight "GeneratoreOrario" / "GUI" / "OrarioClassiController" / "relazioni" <<rel>>
-
 #highlight "GeneratoreOrario" / "GUI" / "VincoliController" <<cls>>
 #highlight "GeneratoreOrario" / "GUI" / "VincoliController" / "campi" <<field>>
 #highlight "GeneratoreOrario" / "GUI" / "VincoliController" / "metodi" <<method>>
@@ -277,7 +254,7 @@
         }
       },
 
-      "Tuple<T1, T2, T3>": {
+      "Tuple (T1, T2, T3)": {
         "campi": {
           "- t1": "T1",
           "- t2": "T2",
