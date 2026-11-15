@@ -27,6 +27,8 @@
             </font>
         </Label>
         <ComboBox fx:id="comboBoxClassi" prefWidth="250.0" promptText="Seleziona Classe" />
+
+        <Button onAction="#esportaOrarioCSV" fx:id="bottoneEsporta" text="Esporta CSV"/>
     </HBox>
 
     <ScrollPane fitToWidth="true" style="-fx-background: #2b2b2b; -fx-background-color: #2b2b2b;">

@@ -11,7 +11,7 @@ public class GeneratoreOrarioScuola {
     private final Scuola scuola;
     private final int giorni = GiorniSettimana.GIORNI_SCOLASTICI;
     private final int ore = GiorniSettimana.ORE_AL_GIORNO;
-    private final int TUTTI = (1 << (giorni * ore)) - 1;
+    private final int MASCHERA_TUTTI_SLOT = (1 << (giorni * ore)) - 1;
     private final Random random = new Random();
 
     private Map<Docente, Integer> bitmaskDocenti;
@@ -31,100 +31,139 @@ public class GeneratoreOrarioScuola {
         return 1 << (giorno * this.ore + ora);
     }
 
-    // calcola gli slot in cui il docente non puo essere assegnato
-    private int vietati(Docente docente) {
+    // ritorna se il prof ha gia assegnato quello slot
+    private boolean docenteInsegna(Docente docente, int ora, int giorno) {
         int slotOccupati = bitmaskDocenti.getOrDefault(docente, 0);
-        int slotVietati = slotOccupati | bitmaskOreNonDisponibili.getOrDefault(docente, 0);
-        int maxOreConsecutive = docente.getOreMaxConsecutive();
-        int mascheraGiorno = (1 << ore) - 1;
+        return (slotOccupati & bit(ora, giorno)) != 0;
+    }
+
+    // calcola quante ore insegna docente in quel giorno
+    private int calcolaOreDocenteNelGiorno(Docente docente, int giorno) {
+        int conteggio = 0;
+        for (int o = 0; o < ore; o++) {
+            if (docenteInsegna(docente, o, giorno)) {
+                conteggio++;
+            }
+        }
+        return conteggio;
+    }
+
+    // calcola se il prof insegna piu ore del max
+    private boolean superaMaxConsecutiveSeAssegnato(Docente docente, int ora, int giorno, int maxConsentite) {
+        int consecutive = 0;
+        int maxRaggiunte = 0;
+        for (int o = 0; o < ore; o++) {
+            boolean insegna = (o == ora) || docenteInsegna(docente, o, giorno);
+            if (insegna) {
+                consecutive++;
+                if (consecutive > maxRaggiunte) {
+                    maxRaggiunte = consecutive;
+                }
+            } else {
+                consecutive = 0;
+            }
+        }
+        return maxRaggiunte > maxConsentite;
+    }
+
+    // calcola gli slot in cui il docente non puo essere assegnato
+    private int slotVietati(Docente docente) {
+        int vietati = bitmaskDocenti.getOrDefault(docente, 0) | bitmaskOreNonDisponibili.getOrDefault(docente, 0);
+        int maxConsecutive = docente.getOreMaxConsecutive();
+
         for (int g = 0; g < giorni; g++) {
-            int bitmaskGiorno = (slotOccupati >> (g * ore)) & mascheraGiorno;
-            if (Integer.bitCount(bitmaskGiorno) >= docente.getMaxOreGiorno(GiorniSettimana.values()[g])) {
-                slotVietati |= mascheraGiorno << (g * ore);
-            } else if (maxOreConsecutive < ore) {
+            GiorniSettimana giornoEnum = GiorniSettimana.values()[g];
+            int maxOreGiorno = docente.getMaxOreGiorno(giornoEnum);
+            int oreGiaAssegnate = calcolaOreDocenteNelGiorno(docente, g);
+
+            if (oreGiaAssegnate >= maxOreGiorno) {
                 for (int o = 0; o < ore; o++) {
-                    if ((bitmaskGiorno & (1 << o)) == 0 && maxConsecutive(bitmaskGiorno | (1 << o)) > maxOreConsecutive) {
-                        slotVietati |= bit(o, g);
+                    vietati |= bit(o, g);
+                }
+            } else if (maxConsecutive < ore) {
+                for (int o = 0; o < ore; o++) {
+                    if (!docenteInsegna(docente, o, g) && superaMaxConsecutiveSeAssegnato(docente, o, g, maxConsecutive)) {
+                        vietati |= bit(o, g);
                     }
                 }
             }
         }
-        return slotVietati;
+        return vietati;
     }
 
-    // calcola le ore consecutive massime
-    private int maxConsecutive(int bitmaskGiorno) {
-        int maxConsecutive = 0, consecutiveCorrenti = 0;
-        for (int ora = 0; ora < ore; ora++) {
-            consecutiveCorrenti = ((bitmaskGiorno & (1 << ora)) != 0) ? consecutiveCorrenti + 1 : 0;
-            if (consecutiveCorrenti > maxConsecutive) maxConsecutive = consecutiveCorrenti;
+    // ritorna bitmask degli slot liberi
+    private int slotLiberi(Richiesta richiesta) {
+        int slotNonDisponibili = bitmaskClassi.getOrDefault(richiesta.classe, 0);
+        for (Docente docente : richiesta.docenti) {
+            slotNonDisponibili |= slotVietati(docente);
         }
-        return maxConsecutive;
+        return ~slotNonDisponibili & MASCHERA_TUTTI_SLOT;
     }
 
-    // calcola gli slot liberi
-    private int liberi(Richiesta richiesta) {
-        int slotOccupati = bitmaskClassi.getOrDefault(richiesta.classe, 0);
-        for (Docente d : richiesta.docenti) {
-            slotOccupati |= vietati(d);
-        }
-        return ~slotOccupati & TUTTI;
-    }
-
-    // seleziona uno slot disponibile dalla bitmask
-    private int[] scegliSlot(Richiesta richiesta, int bitmaskSlotDisponibili) {
-        int bitmaskSlotAdiacenti = 0, mascheraGiorno = (1 << ore) - 1;
-        for (Docente d : richiesta.docenti) {
-            if (d.getOreMinConsecutive() > 1) {
-                int slotOccupati = bitmaskDocenti.getOrDefault(d, 0);
-                for (int g = 0; g < giorni; g++) {
-                    int bitmaskGiorno = (slotOccupati >> (g * ore)) & mascheraGiorno;
-                    bitmaskSlotAdiacenti |= (((bitmaskGiorno << 1) | (bitmaskGiorno >> 1)) & mascheraGiorno) << (g * ore);
+    private boolean haDocenteConOreVicine(List<Docente> docenti, int ora, int giorno) {
+        for (Docente docente : docenti) {
+            if (docente.getOreMinConsecutive() > 1) {
+                boolean oraPrecedenteOccupata = (ora > 0) && docenteInsegna(docente, ora - 1, giorno);
+                boolean oraSuccessivaOccupata = (ora < ore - 1) && docenteInsegna(docente, ora + 1, giorno);
+                if (oraPrecedenteOccupata || oraSuccessivaOccupata) {
+                    return true;
                 }
             }
         }
-        int slotPreferiti = bitmaskSlotDisponibili & bitmaskSlotAdiacenti;
-        return casuale(slotPreferiti != 0 ? slotPreferiti : bitmaskSlotDisponibili);
+        return false;
     }
 
-    // seleziona casualmente un bit e lo rende una coppia ora:giorno
-    private int[] casuale(int bitmaskSlot) {
-        int indiceCasuale = random.nextInt(Integer.bitCount(bitmaskSlot));
-        for (int k = 0; k < indiceCasuale; k++) {
-            bitmaskSlot &= bitmaskSlot - 1;
+    private int[] scegliSlot(Richiesta richiesta, int bitmaskSlotDisponibili) {
+        List<int[]> disponibili = convertiBitmaskInListaSlot(bitmaskSlotDisponibili);
+        List<int[]> preferiti = new ArrayList<>();
+
+        for (int[] slot : disponibili) {
+            int oraSlot = slot[0];
+            int giornoSlot = slot[1];
+
+            if (haDocenteConOreVicine(richiesta.docenti, oraSlot, giornoSlot)) {
+                preferiti.add(slot);
+            }
         }
-        int posizioneBit = Integer.numberOfTrailingZeros(bitmaskSlot);
-        return new int[]{posizioneBit % ore, posizioneBit / ore};
+
+        if (!preferiti.isEmpty()) {
+            return preferiti.get(random.nextInt(preferiti.size()));
+        }
+        return disponibili.get(random.nextInt(disponibili.size()));
     }
 
-    // converte tutti i bit in coppie ore:giorno
-    private List<int[]> tutti(int bitmaskSlot) {
+    private List<int[]> convertiBitmaskInListaSlot(int bitmask) {
         List<int[]> listaSlot = new ArrayList<>();
-        while (bitmaskSlot != 0) {
-            int posizioneBit = Integer.numberOfTrailingZeros(bitmaskSlot);
-            listaSlot.add(new int[]{
-                    posizioneBit % ore, posizioneBit / ore
-            });
-            bitmaskSlot &= bitmaskSlot - 1;
+        for (int g = 0; g < giorni; g++) {
+            for (int o = 0; o < ore; o++) {
+                if ((bitmask & bit(o, g)) != 0) {
+                    listaSlot.add(new int[]{o, g});
+                }
+            }
         }
         return listaSlot;
     }
 
-    // crea le matrici Lezione[][] per ogni docente e aggiorna le bitmask
+    // seleziona uno slot casuale
+    private int[] estraiSlotCasuale(int bitmask) {
+        List<int[]> slotDisponibili = convertiBitmaskInListaSlot(bitmask);
+        return slotDisponibili.get(random.nextInt(slotDisponibili.size()));
+    }
+
+    // assegna un ora a un docente
     private void assegna(Richiesta richiesta, int ora, int giorno) {
         int mascheraSlot = bit(ora, giorno);
         Lezione[] lezioniSlot = new Lezione[richiesta.docenti.size()];
         for (int i = 0; i < richiesta.docenti.size(); i++) {
             Docente docente = richiesta.docenti.get(i);
             lezioniSlot[i] = new Lezione(docente, richiesta.materia, richiesta.classe);
-            bitmaskDocenti.merge(docente, mascheraSlot, (precedente, nuovo) -> precedente | nuovo);
+            bitmaskDocenti.put(docente, bitmaskDocenti.getOrDefault(docente, 0) | mascheraSlot);
         }
         orariClassi.get(richiesta.classe)[ora][giorno] = lezioniSlot;
-        bitmaskClassi.merge(richiesta.classe, mascheraSlot, (precedente, nuovo) -> precedente | nuovo);
+        bitmaskClassi.put(richiesta.classe, bitmaskClassi.getOrDefault(richiesta.classe, 0) | mascheraSlot);
     }
 
-
-    // rimuove una lezione
+    // rimuovi assegnazione
     private Richiesta rimuovi(Classe classe, int ora, int giorno) {
         Lezione[] lezioniSlot = orariClassi.get(classe)[ora][giorno];
         if (lezioniSlot == null || lezioniSlot.length == 0) {
@@ -132,8 +171,8 @@ public class GeneratoreOrarioScuola {
         }
         int mascheraSlot = bit(ora, giorno);
         List<Docente> docentiLezione = new ArrayList<>();
-        for (Lezione l : lezioniSlot) {
-            Docente docente = l.getDocente();
+        for (Lezione lezione : lezioniSlot) {
+            Docente docente = lezione.getDocente();
             docentiLezione.add(docente);
             bitmaskDocenti.put(docente, bitmaskDocenti.get(docente) & ~mascheraSlot);
         }
@@ -146,23 +185,30 @@ public class GeneratoreOrarioScuola {
     public void generaOrario() {
         List<Gruppo> gruppi = identificaGruppi();
         int oreObiettivo = gruppi.stream().mapToInt(Gruppo::ore).sum();
-        for (Docente d : scuola.getTuttiDocenti()) {
-            if (d.getOreTotali() > giorni * ore) {
-                oreObiettivo -= (d.getOreTotali() - giorni * ore);
+        for (Docente docente : scuola.getTuttiDocenti()) {
+            int maxOreSettimanali = giorni * ore;
+            if (docente.getOreTotali() > maxOreSettimanali) {
+                oreObiettivo -= (docente.getOreTotali() - maxOreSettimanali);
             }
         }
 
-        int migliorPunteggio = -1, migliorPenalita = Integer.MAX_VALUE;
+        int migliorPunteggio = -1;
+        int migliorPenalita = Integer.MAX_VALUE;
         Map<Classe, Lezione[][][]> migliorOrario = null;
 
         for (int t = 0; t < MAX_TENTATIVI; t++) {
             int orePiazzate = tentativo(gruppi);
             int penalita = (orePiazzate >= oreObiettivo) ? penalitaMinCons() : Integer.MAX_VALUE;
+
             if (orePiazzate >= oreObiettivo && penalita == 0) {
                 copiaFinale();
                 return;
             }
-            if (orePiazzate > migliorPunteggio || (orePiazzate == migliorPunteggio && penalita < migliorPenalita)) {
+
+            boolean trovatoMigliore = (orePiazzate > migliorPunteggio)
+                    || (orePiazzate == migliorPunteggio && penalita < migliorPenalita);
+
+            if (trovatoMigliore) {
                 migliorPunteggio = orePiazzate;
                 migliorPenalita = penalita;
                 migliorOrario = copiaOrari();
@@ -175,24 +221,24 @@ public class GeneratoreOrarioScuola {
         }
     }
 
-    // prova ad assegnare una lezione
+    // prova ad assegnare
     private int tentativo(List<Gruppo> gruppi) {
         bitmaskDocenti = new HashMap<>();
-        for (Docente d : scuola.getTuttiDocenti()) {
-            bitmaskDocenti.put(d, 0);
+        for (Docente docente : scuola.getTuttiDocenti()) {
+            bitmaskDocenti.put(docente, 0);
         }
 
         bitmaskClassi = new HashMap<>();
         orariClassi = new HashMap<>();
-        for (Classe c : scuola.getTutteClassi()) {
-            bitmaskClassi.put(c, 0);
-            orariClassi.put(c, new Lezione[ore][giorni][]);
+        for (Classe classe : scuola.getTutteClassi()) {
+            bitmaskClassi.put(classe, 0);
+            orariClassi.put(classe, new Lezione[ore][giorni][]);
         }
 
         bitmaskOreNonDisponibili = new HashMap<>();
-        for (Docente d : scuola.getTuttiDocenti()) {
+        for (Docente docente : scuola.getTuttiDocenti()) {
             int mascheraIndisponibilita = 0;
-            for (GiorniSettimana gl : d.getGiorniLiberi()) {
+            for (GiorniSettimana gl : docente.getGiorniLiberi()) {
                 int indiceGiorno = gl.ordinal();
                 if (indiceGiorno < giorni) {
                     for (int o = 0; o < ore; o++) {
@@ -200,13 +246,17 @@ public class GeneratoreOrarioScuola {
                     }
                 }
             }
-            if (!d.isPuoPrimaOra()) {
-                for (int g = 0; g < giorni; g++) mascheraIndisponibilita |= bit(0, g);
+            if (!docente.isPuoPrimaOra()) {
+                for (int g = 0; g < giorni; g++) {
+                    mascheraIndisponibilita |= bit(0, g);
+                }
             }
-            if (!d.isPuoUltimaOra()) {
-                for (int g = 0; g < giorni; g++) mascheraIndisponibilita |= bit(ore - 1, g);
+            if (!docente.isPuoUltimaOra()) {
+                for (int g = 0; g < giorni; g++) {
+                    mascheraIndisponibilita |= bit(ore - 1, g);
+                }
             }
-            bitmaskOreNonDisponibili.put(d, mascheraIndisponibilita);
+            bitmaskOreNonDisponibili.put(docente, mascheraIndisponibilita);
         }
 
         List<Richiesta> richieste = new ArrayList<>();
@@ -216,70 +266,85 @@ public class GeneratoreOrarioScuola {
             }
         }
         Collections.shuffle(richieste, random);
-        richieste.sort(Comparator.comparingInt(richiesta -> Integer.bitCount(liberi(richiesta))));
+        richieste.sort(Comparator.comparingInt(richiesta -> Integer.bitCount(slotLiberi(richiesta))));
 
         int orePiazzate = 0;
         List<Richiesta> richiesteFallite = new ArrayList<>();
-        for (Richiesta r : richieste) {
-            int slotLiberi = liberi(r);
-            if (slotLiberi != 0) {
-                int[] slotScelto = scegliSlot(r, slotLiberi);
-                assegna(r, slotScelto[0], slotScelto[1]);
+        for (Richiesta richiesta : richieste) {
+            int disponibili = slotLiberi(richiesta);
+            if (disponibili != 0) {
+                int[] slotScelto = scegliSlot(richiesta, disponibili);
+                assegna(richiesta, slotScelto[0], slotScelto[1]);
                 orePiazzate++;
             } else {
-                richiesteFallite.add(r);
+                richiesteFallite.add(richiesta);
             }
         }
 
         for (int iter = 0; iter < MAX_SCAMBI && !richiesteFallite.isEmpty(); iter++) {
             Richiesta richiestaCorrente = richiesteFallite.get(random.nextInt(richiesteFallite.size()));
             int slotVietatiDocenti = 0;
-            for (Docente d : richiestaCorrente.docenti) {
-                slotVietatiDocenti |= vietati(d);
+            for (Docente docente : richiestaCorrente.docenti) {
+                slotVietatiDocenti |= slotVietati(docente);
             }
-            int bitmaskCandidati = bitmaskClassi.getOrDefault(richiestaCorrente.classe, 0) & ~slotVietatiDocenti & TUTTI;
-            List<int[]> listaSlotCandidati = tutti(bitmaskCandidati);
+            int bitmaskCandidati = bitmaskClassi.getOrDefault(richiestaCorrente.classe, 0)
+                    & ~slotVietatiDocenti
+                    & MASCHERA_TUTTI_SLOT;
+            List<int[]> listaSlotCandidati = convertiBitmaskInListaSlot(bitmaskCandidati);
             Collections.shuffle(listaSlotCandidati, random);
 
             boolean scambioRiuscito = false;
-            for (int[] s : listaSlotCandidati) {
-                Richiesta richiestaSpostata = rimuovi(richiestaCorrente.classe, s[0], s[1]);
-                int slotLiberiSpostata = liberi(richiestaSpostata);
+            for (int[] slot : listaSlotCandidati) {
+                int oraSlot = slot[0];
+                int giornoSlot = slot[1];
+                Richiesta richiestaSpostata = rimuovi(richiestaCorrente.classe, oraSlot, giornoSlot);
+                int slotLiberiSpostata = slotLiberi(richiestaSpostata);
+
                 if (slotLiberiSpostata != 0) {
-                    int[] nuovoSlot = casuale(slotLiberiSpostata);
+                    int[] nuovoSlot = estraiSlotCasuale(slotLiberiSpostata);
                     assegna(richiestaSpostata, nuovoSlot[0], nuovoSlot[1]);
-                    assegna(richiestaCorrente, s[0], s[1]);
+                    assegna(richiestaCorrente, oraSlot, giornoSlot);
                     richiesteFallite.remove(richiestaCorrente);
                     orePiazzate++;
                     scambioRiuscito = true;
                     break;
                 } else {
-                    assegna(richiestaSpostata, s[0], s[1]);
+                    assegna(richiestaSpostata, oraSlot, giornoSlot);
                 }
             }
 
             if (!scambioRiuscito) {
-                for (Docente d : richiestaCorrente.docenti) {
+                for (Docente docente : richiestaCorrente.docenti) {
                     if (scambioRiuscito) {
                         break;
                     }
-                    int bitmaskConflitti = bitmaskDocenti.get(d) & ~bitmaskClassi.getOrDefault(richiestaCorrente.classe, 0) & TUTTI;
-                    for (int[] cs : tutti(bitmaskConflitti)) {
-                        Lezione lezioneInConflitto = trovaLezioneDocente(d, cs[0], cs[1]);
+                    int bitmaskConflitti = bitmaskDocenti.getOrDefault(docente, 0)
+                            & ~bitmaskClassi.getOrDefault(richiestaCorrente.classe, 0)
+                            & MASCHERA_TUTTI_SLOT;
+                    List<int[]> slotConflitto = convertiBitmaskInListaSlot(bitmaskConflitti);
+
+                    for (int[] slot : slotConflitto) {
+                        int oraSlot = slot[0];
+                        int giornoSlot = slot[1];
+                        Lezione lezioneInConflitto = trovaLezioneDocente(docente, oraSlot, giornoSlot);
                         if (lezioneInConflitto == null) {
                             continue;
                         }
-                        Richiesta richiestaSpostata = rimuovi(lezioneInConflitto.getClasse(), cs[0], cs[1]);
-                        int slotLiberiSpostata = liberi(richiestaSpostata);
+
+                        Richiesta richiestaSpostata = rimuovi(lezioneInConflitto.getClasse(), oraSlot, giornoSlot);
+                        int slotLiberiSpostata = slotLiberi(richiestaSpostata);
+
                         if (slotLiberiSpostata == 0) {
-                            assegna(richiestaSpostata, cs[0], cs[1]);
+                            assegna(richiestaSpostata, oraSlot, giornoSlot);
                             continue;
                         }
-                        int[] nuovoSlot = casuale(slotLiberiSpostata);
+
+                        int[] nuovoSlot = estraiSlotCasuale(slotLiberiSpostata);
                         assegna(richiestaSpostata, nuovoSlot[0], nuovoSlot[1]);
-                        int slotLiberiRichiesta = liberi(richiestaCorrente);
+
+                        int slotLiberiRichiesta = slotLiberi(richiestaCorrente);
                         if (slotLiberiRichiesta != 0) {
-                            int[] slotRichiesta = casuale(slotLiberiRichiesta);
+                            int[] slotRichiesta = estraiSlotCasuale(slotLiberiRichiesta);
                             assegna(richiestaCorrente, slotRichiesta[0], slotRichiesta[1]);
                             richiesteFallite.remove(richiestaCorrente);
                             orePiazzate++;
@@ -287,7 +352,7 @@ public class GeneratoreOrarioScuola {
                             break;
                         } else {
                             rimuovi(lezioneInConflitto.getClasse(), nuovoSlot[0], nuovoSlot[1]);
-                            assegna(richiestaSpostata, cs[0], cs[1]);
+                            assegna(richiestaSpostata, oraSlot, giornoSlot);
                         }
                     }
                 }
@@ -296,30 +361,40 @@ public class GeneratoreOrarioScuola {
         return orePiazzate;
     }
 
-    //
+    // ore minime consecutive
     private int penalitaMinCons() {
-        int penalitaTotale = 0, mascheraGiorno = (1 << ore) - 1;
-        for (Docente d : scuola.getTuttiDocenti()) {
-            int oreMinConsecutive = d.getOreMinConsecutive();
-            if (oreMinConsecutive <= 1) continue;
-            int slotOccupati = bitmaskDocenti.getOrDefault(d, 0);
+        int penalitaTotale = 0;
+
+        for (Docente docente : scuola.getTuttiDocenti()) {
+            int minimoRichiesto = docente.getOreMinConsecutive();
+            if (minimoRichiesto <= 1) {
+                continue;
+            }
+
             for (int g = 0; g < giorni; g++) {
-                int bitmaskGiorno = (slotOccupati >> (g * ore)) & mascheraGiorno;
-                int oreConsecutive = 0;
-                for (int o = 0; o <= ore; o++) {
-                    if (o < ore && (bitmaskGiorno & (1 << o)) != 0) {
-                        oreConsecutive++;
-                    } else if (oreConsecutive > 0) {
-                        if (oreConsecutive < oreMinConsecutive) penalitaTotale += (oreMinConsecutive - oreConsecutive);
-                        oreConsecutive = 0;
+                int bloccoConsecutivo = 0;
+
+                for (int o = 0; o < ore; o++) {
+                    if (docenteInsegna(docente, o, g)) {
+                        bloccoConsecutivo++;
+                    } else {
+                        if (bloccoConsecutivo > 0 && bloccoConsecutivo < minimoRichiesto) {
+                            penalitaTotale += (minimoRichiesto - bloccoConsecutivo);
+                        }
+                        bloccoConsecutivo = 0;
                     }
+                }
+
+                if (bloccoConsecutivo > 0 && bloccoConsecutivo < minimoRichiesto) {
+                    penalitaTotale += (minimoRichiesto - bloccoConsecutivo);
                 }
             }
         }
+
         return penalitaTotale;
     }
 
-    // Rileva le compresenze
+    // rileva le compresenza
     private List<Gruppo> identificaGruppi() {
         Map<String, List<Assegnazione>> mappaAssegnazioni = new LinkedHashMap<>();
         for (Assegnazione a : scuola.getAssegnazioni()) {
@@ -331,20 +406,32 @@ public class GeneratoreOrarioScuola {
         for (List<Assegnazione> lista : mappaAssegnazioni.values()) {
             if (lista.size() == 1) {
                 Assegnazione primaAssegnazione = lista.getFirst();
-                gruppi.add(new Gruppo(List.of(primaAssegnazione.getDocente()), primaAssegnazione.getClasse(), primaAssegnazione.getMateria(), primaAssegnazione.getOreSettimanali()));
+                gruppi.add(new Gruppo(
+                        List.of(primaAssegnazione.getDocente()),
+                        primaAssegnazione.getClasse(),
+                        primaAssegnazione.getMateria(),
+                        primaAssegnazione.getOreSettimanali()
+                ));
                 continue;
             }
+
             int oreMassime = lista.stream().mapToInt(Assegnazione::getOreSettimanali).max().orElse(0);
             int oreMinime = lista.stream().mapToInt(Assegnazione::getOreSettimanali).min().orElse(0);
             List<Docente> docentiGruppo = lista.stream().map(Assegnazione::getDocente).toList();
             Assegnazione primaAssegnazione = lista.getFirst();
+
             if (oreMinime == oreMassime) {
                 gruppi.add(new Gruppo(docentiGruppo, primaAssegnazione.getClasse(), primaAssegnazione.getMateria(), oreMassime));
             } else {
                 gruppi.add(new Gruppo(docentiGruppo, primaAssegnazione.getClasse(), primaAssegnazione.getMateria(), oreMinime));
                 for (Assegnazione a : lista) {
                     if (a.getOreSettimanali() > oreMinime) {
-                        gruppi.add(new Gruppo(List.of(a.getDocente()), a.getClasse(), a.getMateria(), a.getOreSettimanali() - oreMinime));
+                        gruppi.add(new Gruppo(
+                                List.of(a.getDocente()),
+                                a.getClasse(),
+                                a.getMateria(),
+                                a.getOreSettimanali() - oreMinime
+                        ));
                     }
                 }
             }
@@ -367,7 +454,6 @@ public class GeneratoreOrarioScuola {
         return null;
     }
 
-    // Coapia l'orario attuale (la matrice 3d serve per le compresenze)
     private Map<Classe, Lezione[][][]> copiaOrari() {
         Map<Classe, Lezione[][][]> mappaCopia = new HashMap<>();
         for (Classe c : scuola.getTutteClassi()) {
@@ -385,7 +471,6 @@ public class GeneratoreOrarioScuola {
         return mappaCopia;
     }
 
-    //
     private void copiaFinale() {
         for (Classe c : scuola.getTutteClassi()) {
             Lezione[][] tabellaLezioni = new Lezione[ore][giorni];

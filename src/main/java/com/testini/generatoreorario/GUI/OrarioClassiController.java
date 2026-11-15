@@ -5,13 +5,17 @@ import com.testini.generatoreorario.ClassiBasi.Docente;
 import com.testini.generatoreorario.ClassiBasi.GiorniSettimana;
 import com.testini.generatoreorario.ClassiBasi.Lezione;
 import com.testini.generatoreorario.ClassiBasi.Scuola;
+import com.testini.generatoreorario.Parser.EsportatoreCSV;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.TextAlignment;
 
+import java.io.File;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -25,6 +29,9 @@ public class OrarioClassiController {
 
     @FXML
     private GridPane grigliaOrario;
+
+    @FXML
+    private Button bottoneEsporta;
 
     private Scuola scuola;
 
@@ -136,5 +143,21 @@ public class OrarioClassiController {
         if (materiaMinuscolo.contains("tec") || materiaMinuscolo.contains("cantiere") || materiaMinuscolo.contains("topografia") || materiaMinuscolo.contains("estimo") || materiaMinuscolo.contains("prog.cost")) return "materia-tecnica";
 
         return "cella-lezione";
+    }
+
+    @FXML
+    protected void esportaOrarioCSV(ActionEvent e) {
+        String nomeClasse = comboBoxClassi.getValue();
+
+        if (nomeClasse != null && scuola != null) {
+            Classe classe = scuola.getClassi().get(nomeClasse);
+
+            if (classe != null) {
+                String nomeFile = classe.getAnno() + classe.getSezione() + classe.getIndirizzo() + "_Orario" + ".csv";
+
+                if(EsportatoreCSV.esportaOrarioClasseCSV(classe, new File(nomeFile))) System.out.println("Esportazione avvenuta!");
+                else System.err.println("Esportazione non avvenuta!");
+            }
+        }
     }
 }
