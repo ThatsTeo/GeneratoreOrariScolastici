@@ -66,10 +66,10 @@ public class MainController {
             for (int i = 0; i < colonneEsistenti.size(); i++) {
                 TableColumn<List<String>, String> colonna = (TableColumn<List<String>, String>) colonneEsistenti.get(i);
 
-                final int colIndex = i;
+                final int indiceColonna = i;
                 colonna.setCellValueFactory(cellData -> {
                     List<String> riga = cellData.getValue();
-                    return new javafx.beans.property.SimpleStringProperty(riga.get(colIndex));
+                    return new javafx.beans.property.SimpleStringProperty(riga.get(indiceColonna));
                 });
             }
 

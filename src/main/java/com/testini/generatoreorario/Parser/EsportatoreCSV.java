@@ -14,26 +14,26 @@ public class EsportatoreCSV {
 
     // Esporta l'orario completo di tutte le classi in un file CSV a griglia
     public static boolean esportaOrarioClassi(Collection<Classe> classi, File fileDestinazione) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileDestinazione))) {
-            bw.write("Classe;Ora;Lunedi;Martedi;Mercoledi;Giovedi;Venerdi");
-            bw.newLine();
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileDestinazione))) {
+            bufferedWriter.write("Classe;Ora;Lunedi;Martedi;Mercoledi;Giovedi;Venerdi");
+            bufferedWriter.newLine();
 
-            for (Classe c: classi) {
-                Lezione[][] tab = c.getTabellaLezioni();
+            for (Classe c : classi) {
+                Lezione[][] tabellaLezioni = c.getTabellaLezioni();
                 for (int ora = 0; ora < GiorniSettimana.ORE_AL_GIORNO; ora++) {
                     StringBuilder riga = new StringBuilder();
                     riga.append(c.getNomeCompleto()).append(";").append(ora + 1).append("° ora");
 
                     for (int g = 0; g < GiorniSettimana.GIORNI_SCOLASTICI; g++) {
                         riga.append(";");
-                        if (tab != null && tab[ora][g] != null) {
-                            riga.append(tab[ora][g].toString().replace(";", ","));
+                        if (tabellaLezioni != null && tabellaLezioni[ora][g] != null) {
+                            riga.append(tabellaLezioni[ora][g].toString().replace(";", ","));
                         } else {
                             riga.append("-");
                         }
                     }
-                    bw.write(riga.toString());
-                    bw.newLine();
+                    bufferedWriter.write(riga.toString());
+                    bufferedWriter.newLine();
                 }
             }
             return true;
@@ -45,30 +45,30 @@ public class EsportatoreCSV {
 
     // Esporta l'orario di tutti i docenti in un file CSV
     public static boolean esportaOrarioDocenti(Collection<Docente> docenti, GeneratoreOrarioScuola generatore, File fileDestinazione) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileDestinazione))) {
-            bw.write("Docente;Ora;Lunedi;Martedi;Mercoledi;Giovedi;Venerdi");
-            bw.newLine();
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileDestinazione))) {
+            bufferedWriter.write("Docente;Ora;Lunedi;Martedi;Mercoledi;Giovedi;Venerdi");
+            bufferedWriter.newLine();
 
             for (Docente d : docenti) {
-                Lezione[][] tab = generatore.estraiOrarioDocente(d);
+                Lezione[][] tabellaLezioni = generatore.estraiOrarioDocente(d);
                 for (int ora = 0; ora < GiorniSettimana.ORE_AL_GIORNO; ora++) {
                     StringBuilder riga = new StringBuilder();
                     riga.append(d.getNomeCognome()).append(";").append(ora + 1).append("° ora");
 
                     for (int g = 0; g < GiorniSettimana.GIORNI_SCOLASTICI; g++) {
                         riga.append(";");
-                        if (tab != null && tab[ora][g] != null) {
-                            Lezione l = tab[ora][g];
-                            riga.append(l.getMateria().getNomeMateria())
+                        if (tabellaLezioni != null && tabellaLezioni[ora][g] != null) {
+                            Lezione lezione = tabellaLezioni[ora][g];
+                            riga.append(lezione.getMateria().getNomeMateria())
                                 .append(" (")
-                                .append(l.getClasse().getNomeCompleto())
+                                .append(lezione.getClasse().getNomeCompleto())
                                 .append(")");
                         } else {
                             riga.append("-");
                         }
                     }
-                    bw.write(riga.toString());
-                    bw.newLine();
+                    bufferedWriter.write(riga.toString());
+                    bufferedWriter.newLine();
                 }
             }
             return true;

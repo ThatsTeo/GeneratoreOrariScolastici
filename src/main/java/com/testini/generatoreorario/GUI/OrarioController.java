@@ -31,9 +31,9 @@ public class OrarioController {
         comboBoxDocenti.setOnAction(event -> {
             String nomeDocente = comboBoxDocenti.getValue();
             if (nomeDocente != null && scuola != null && generatore != null) {
-                Docente d = scuola.getDocenti().get(nomeDocente);
-                if (d != null) {
-                    mostraOrarioDocente(d);
+                Docente docente = scuola.getDocenti().get(nomeDocente);
+                if (docente != null) {
+                    mostraOrarioDocente(docente);
                 }
             }
         });
@@ -68,19 +68,19 @@ public class OrarioController {
         String[] giorni = {"Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì"};
 
         // Cella intestazione
-        Label lblOraH = new Label("Ora");
-        lblOraH.getStyleClass().add("cella-header");
-        lblOraH.setPrefSize(70, 35);
-        lblOraH.setAlignment(Pos.CENTER);
-        grigliaOrario.add(lblOraH, 0, 0);
+        Label labelIntestazioneOra = new Label("Ora");
+        labelIntestazioneOra.getStyleClass().add("cella-header");
+        labelIntestazioneOra.setPrefSize(70, 35);
+        labelIntestazioneOra.setAlignment(Pos.CENTER);
+        grigliaOrario.add(labelIntestazioneOra, 0, 0);
 
         // Intestazioni dei giorni
         for (int g = 0; g < giorni.length; g++) {
-            Label lblG = new Label(giorni[g]);
-            lblG.getStyleClass().add("cella-header");
-            lblG.setPrefSize(130, 35);
-            lblG.setAlignment(Pos.CENTER);
-            grigliaOrario.add(lblG, g + 1, 0);
+            Label labelGiorno = new Label(giorni[g]);
+            labelGiorno.getStyleClass().add("cella-header");
+            labelGiorno.setPrefSize(130, 35);
+            labelGiorno.setAlignment(Pos.CENTER);
+            grigliaOrario.add(labelGiorno, g + 1, 0);
         }
 
         // Estrazione lezioni dal generatore del backend
@@ -88,25 +88,25 @@ public class OrarioController {
 
         for (int o = 0; o < GiorniSettimana.ORE_AL_GIORNO; o++) {
             // Etichetta dell'ora
-            Label lblOra = new Label((o + 1) + "ª ora");
-            lblOra.getStyleClass().add("cella-ora");
-            lblOra.setPrefSize(70, 55);
-            lblOra.setAlignment(Pos.CENTER);
-            grigliaOrario.add(lblOra, 0, o + 1);
+            Label labelOra = new Label((o + 1) + "ª ora");
+            labelOra.getStyleClass().add("cella-ora");
+            labelOra.setPrefSize(70, 55);
+            labelOra.setAlignment(Pos.CENTER);
+            grigliaOrario.add(labelOra, 0, o + 1);
 
             // Singole lezioni per ogni giorno
             for (int g = 0; g < GiorniSettimana.GIORNI_SCOLASTICI; g++) {
-                Lezione l = (orario != null) ? orario[o][g] : null;
+                Lezione lezione = (orario != null) ? orario[o][g] : null;
                 Label cella = new Label();
                 cella.setPrefSize(130, 55);
                 cella.setAlignment(Pos.CENTER);
                 cella.setTextAlignment(TextAlignment.CENTER);
                 cella.setWrapText(true);
 
-                if (l != null) {
-                    cella.setText(l.getMateria().getNomeMateria() + "\n(" + l.getClasse().getNomeCompleto() + ")");
+                if (lezione != null) {
+                    cella.setText(lezione.getMateria().getNomeMateria() + "\n(" + lezione.getClasse().getNomeCompleto() + ")");
                     cella.getStyleClass().add("cella-lezione");
-                    cella.getStyleClass().add(getClasseStileMateria(l.getMateria().getNomeMateria()));
+                    cella.getStyleClass().add(getClasseStileMateria(lezione.getMateria().getNomeMateria()));
                 } else {
                     cella.setText("-");
                     cella.getStyleClass().add("cella-libera");
@@ -118,22 +118,22 @@ public class OrarioController {
 
     private String getClasseStileMateria(String nomeMateria) {
         if (nomeMateria == null) return "cella-lezione";
-        String s = nomeMateria.toLowerCase().trim();
+        String materiaMinuscolo = nomeMateria.toLowerCase().trim();
 
-        if (s.contains("matematica")) return "materia-matematica";
-        if (s.contains("italiano")) return "materia-italiano";
-        if (s.contains("storia")) return "materia-storia";
-        if (s.contains("bio") || s.contains("igiene") || s.contains("scienze umane") || s.contains("scienze integrate")) return "materia-biologia";
-        if (s.contains("geografia") || s.contains("geopedologia")) return "materia-geografia";
-        if (s.contains("inglese")) return "materia-inglese";
-        if (s.contains("diritto") || s.contains("econ")) return "materia-diritto";
-        if (s.contains("chimica")) return "materia-chimica";
-        if (s.contains("fisica")) return "materia-fisica";
-        if (s.contains("informatica") || s.contains("telecomunicazioni") || s.contains("sistemi") || s.contains("tpsit") || s.contains("gpoi")) return "materia-informatica";
-        if (s.contains("motori") || s.contains("sport")) return "materia-motoria";
-        if (s.contains("religione") || s.contains("irc")) return "materia-religione";
-        if (s.contains("tedesco") || s.contains("francese") || s.contains("spagnolo")) return "materia-lingue";
-        if (s.contains("tec") || s.contains("cantiere") || s.contains("topografia") || s.contains("estimo") || s.contains("prog.cost")) return "materia-tecnica";
+        if (materiaMinuscolo.contains("matematica")) return "materia-matematica";
+        if (materiaMinuscolo.contains("italiano")) return "materia-italiano";
+        if (materiaMinuscolo.contains("storia")) return "materia-storia";
+        if (materiaMinuscolo.contains("bio") || materiaMinuscolo.contains("igiene") || materiaMinuscolo.contains("scienze umane") || materiaMinuscolo.contains("scienze integrate")) return "materia-biologia";
+        if (materiaMinuscolo.contains("geografia") || materiaMinuscolo.contains("geopedologia")) return "materia-geografia";
+        if (materiaMinuscolo.contains("inglese")) return "materia-inglese";
+        if (materiaMinuscolo.contains("diritto") || materiaMinuscolo.contains("econ")) return "materia-diritto";
+        if (materiaMinuscolo.contains("chimica")) return "materia-chimica";
+        if (materiaMinuscolo.contains("fisica")) return "materia-fisica";
+        if (materiaMinuscolo.contains("informatica") || materiaMinuscolo.contains("telecomunicazioni") || materiaMinuscolo.contains("sistemi") || materiaMinuscolo.contains("tpsit") || materiaMinuscolo.contains("gpoi")) return "materia-informatica";
+        if (materiaMinuscolo.contains("motori") || materiaMinuscolo.contains("sport")) return "materia-motoria";
+        if (materiaMinuscolo.contains("religione") || materiaMinuscolo.contains("irc")) return "materia-religione";
+        if (materiaMinuscolo.contains("tedesco") || materiaMinuscolo.contains("francese") || materiaMinuscolo.contains("spagnolo")) return "materia-lingue";
+        if (materiaMinuscolo.contains("tec") || materiaMinuscolo.contains("cantiere") || materiaMinuscolo.contains("topografia") || materiaMinuscolo.contains("estimo") || materiaMinuscolo.contains("prog.cost")) return "materia-tecnica";
 
         return "cella-lezione";
     }

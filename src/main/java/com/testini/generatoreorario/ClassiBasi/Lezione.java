@@ -53,9 +53,9 @@ public class Lezione {
 
     @Override
     public String toString() {
-        String docentiStr = docenti.stream()
+        String nomiDocenti = docenti.stream()
                 .map(Docente::getNomeCognome)
                 .collect(Collectors.joining(", "));
-        return materia.getNomeMateria() + " (" + docentiStr + ")";
+        return materia.getNomeMateria() + " (" + nomiDocenti + ")";
     }
 }

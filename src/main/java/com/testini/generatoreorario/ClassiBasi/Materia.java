@@ -19,10 +19,10 @@ public class Materia {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Materia materia = (Materia) o;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Materia materia = (Materia) obj;
         return Objects.equals(nomeMateria, materia.nomeMateria);
     }
 

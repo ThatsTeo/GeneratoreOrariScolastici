@@ -2,7 +2,7 @@ package com.testini.generatoreorario.Generatori;
 
 import com.testini.generatoreorario.ClassiBasi.*;
 
-// Accesso e visualizzazione dell'orario di una singola classe
+// Orario di una singola classe
 public class GeneratoreOrarioClasse {
     private final Classe classe;
 

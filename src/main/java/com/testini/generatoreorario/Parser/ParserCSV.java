@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,20 +29,41 @@ public class ParserCSV {
         errori.clear();
         avvisi.clear();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(fileCSV))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(fileCSV, StandardCharsets.UTF_8))) {
             String line;
             boolean primaRiga = true;
             int numRiga = 0;
+            String delimiter = ";";
 
             while ((line = br.readLine()) != null) {
                 numRiga++;
-                if (primaRiga) {
-                    primaRiga = false;
-                    continue; // Salta intestazione CSV
+                if (numRiga == 1 && line.startsWith("\uFEFF")) {
+                    line = line.substring(1);
                 }
                 if (line.trim().isEmpty()) continue;
 
-                String[] values = line.split(";");
+                if (primaRiga) {
+                    primaRiga = false;
+                    long countSemicolon = line.chars().filter(ch -> ch == ';').count();
+                    long countComma = line.chars().filter(ch -> ch == ',').count();
+                    if (countComma > countSemicolon) {
+                        delimiter = ",";
+                    } else {
+                        delimiter = ";";
+                    }
+                    continue; // Salta intestazione CSV
+                }
+
+                String[] values = parseLine(line, delimiter);
+                if (values.length < 6) {
+                    String alternateDelimiter = delimiter.equals(";") ? "," : ";";
+                    String[] altValues = parseLine(line, alternateDelimiter);
+                    if (altValues.length >= 6) {
+                        values = altValues;
+                        delimiter = alternateDelimiter;
+                    }
+                }
+
                 if (values.length < 6) {
                     errori.add("Riga " + numRiga + " malformata (campi insufficienti): " + line);
                     continue;
@@ -57,6 +79,52 @@ public class ParserCSV {
         return data;
     }
 
+    public static String[] parseLine(String line) {
+        long countSemicolon = line.chars().filter(ch -> ch == ';').count();
+        long countComma = line.chars().filter(ch -> ch == ',').count();
+        String delim = (countComma > countSemicolon) ? "," : ";";
+        String[] values = parseLine(line, delim);
+        if (values.length < 6) {
+            String alt = delim.equals(";") ? "," : ";";
+            String[] altValues = parseLine(line, alt);
+            if (altValues.length >= 6) {
+                return altValues;
+            }
+        }
+        return values;
+    }
+
+    public static String[] parseLine(String line, String delimiter) {
+        char delim = delimiter.charAt(0);
+        List<String> tokens = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (c == '"') {
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    sb.append('"');
+                    i++; // virgoletta escapata ("")
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (c == delim && !inQuotes) {
+                tokens.add(sb.toString().trim());
+                sb.setLength(0);
+            } else {
+                sb.append(c);
+            }
+        }
+        tokens.add(sb.toString().trim());
+
+        while (tokens.size() > 6 && tokens.get(tokens.size() - 1).isEmpty()) {
+            tokens.remove(tokens.size() - 1);
+        }
+
+        return tokens.toArray(new String[0]);
+    }
+
     public static ArrayList<String> getDocenti() {
         ArrayList<String> nomi = new ArrayList<>();
         for(String[] s: datiFile) {
@@ -67,7 +135,7 @@ public class ParserCSV {
     }
 
     public Scuola costruisciScuola() {
-        if (datiFile == null) {
+        if (datiFile == null || datiFile.isEmpty()) {
             parse();
         }
         if (datiFile == null) {
@@ -127,7 +195,7 @@ public class ParserCSV {
         }
 
         // Segnala eventuali docenti con ore eccessive
-        for (Docente d : scuola.getTuttiIDocenti()) {
+        for (Docente d : scuola.getTuttiDocenti()) {
             if (d.getOreTotali() > GiorniSettimana.GIORNI_SCOLASTICI * GiorniSettimana.ORE_AL_GIORNO) {
                 avvisi.add("Docente " + d.getNomeCognome() + " ha " + d.getOreTotali() + " ore (supera il limite di 30 ore).");
             }

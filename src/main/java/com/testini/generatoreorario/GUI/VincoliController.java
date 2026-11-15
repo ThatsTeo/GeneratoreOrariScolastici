@@ -27,7 +27,7 @@ public class VincoliController {
 
     private Docente docente;
     private Runnable onSave;
-    private final Map<GiorniSettimana, Integer> maxOreTmp = new EnumMap<>(GiorniSettimana.class);
+    private final Map<GiorniSettimana, Integer> maxOreGiornoTemporanee = new EnumMap<>(GiorniSettimana.class);
 
     @FXML
     protected void initialize() {
@@ -41,14 +41,14 @@ public class VincoliController {
         );
         maxOreGiornoCB.setValue(GiorniSettimana.LUNEDI);
 
-        maxOreGiornoSpinner.valueProperty().addListener((obs, oldV, newV) -> {
-            if (maxOreGiornoCB.getValue() != null && newV != null) {
-                maxOreTmp.put(maxOreGiornoCB.getValue(), newV);
+        maxOreGiornoSpinner.valueProperty().addListener((osservabile, vecchioValore, nuovoValore) -> {
+            if (maxOreGiornoCB.getValue() != null && nuovoValore != null) {
+                maxOreGiornoTemporanee.put(maxOreGiornoCB.getValue(), nuovoValore);
             }
         });
-        maxOreGiornoCB.valueProperty().addListener((obs, oldG, newG) -> {
-            if (newG != null) {
-                maxOreGiornoSpinner.getValueFactory().setValue(maxOreTmp.getOrDefault(newG, 6));
+        maxOreGiornoCB.valueProperty().addListener((osservabile, vecchioGiorno, nuovoGiorno) -> {
+            if (nuovoGiorno != null) {
+                maxOreGiornoSpinner.getValueFactory().setValue(maxOreGiornoTemporanee.getOrDefault(nuovoGiorno, 6));
             }
         });
 
@@ -65,11 +65,11 @@ public class VincoliController {
             ultimaOraCheck.setSelected(docente.isPuoUltimaOra());
             oreConsecSlider.getValueFactory().setValue(docente.getOreMinConsecutive());
             oreConsMaxSpinner.getValueFactory().setValue(docente.getOreMaxConsecutive());
-            maxOreTmp.clear();
+            maxOreGiornoTemporanee.clear();
             for (GiorniSettimana g : maxOreGiornoCB.getItems()) {
-                maxOreTmp.put(g, docente.getMaxOreGiorno(g));
+                maxOreGiornoTemporanee.put(g, docente.getMaxOreGiorno(g));
             }
-            maxOreGiornoSpinner.getValueFactory().setValue(maxOreTmp.get(maxOreGiornoCB.getValue()));
+            maxOreGiornoSpinner.getValueFactory().setValue(maxOreGiornoTemporanee.get(maxOreGiornoCB.getValue()));
         } else {
             labelVincoli.setText("Scegli i vincoli");
         }
@@ -78,13 +78,13 @@ public class VincoliController {
     @FXML
     protected void onChiudi(ActionEvent event) {
         if (docente != null) {
-            int minCons = oreConsecSlider.getValue();
-            int maxCons = Math.max(minCons, oreConsMaxSpinner.getValue());
+            int oreMinConsecutive = oreConsecSlider.getValue();
+            int oreMaxConsecutive = Math.max(oreMinConsecutive, oreConsMaxSpinner.getValue());
             docente.setPuoPrimaOra(primaOraCheck.isSelected());
             docente.setPuoUltimaOra(ultimaOraCheck.isSelected());
-            docente.setOreMinConsecutive(minCons);
-            docente.setOreMaxConsecutive(maxCons);
-            docente.setMaxOreGiorno(maxOreTmp);
+            docente.setOreMinConsecutive(oreMinConsecutive);
+            docente.setOreMaxConsecutive(oreMaxConsecutive);
+            docente.setMaxOreGiorno(maxOreGiornoTemporanee);
             if (onSave != null) onSave.run();
         }
         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();

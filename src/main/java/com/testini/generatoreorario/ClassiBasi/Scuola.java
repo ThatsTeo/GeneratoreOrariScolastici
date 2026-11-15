@@ -28,8 +28,8 @@ public class Scuola {
 
     // Ritorna una classe esistente o ne crea una
     public Classe getOCreaClasse(int anno, char sezione, String indirizzo) {
-        String chiave = anno + "" + sezione + " " + indirizzo;
-        return classi.computeIfAbsent(chiave, k -> new Classe(anno, sezione, indirizzo));
+        String chiaveClasse = anno + "" + sezione + " " + indirizzo;
+        return classi.computeIfAbsent(chiaveClasse, chiave -> new Classe(anno, sezione, indirizzo));
     }
 
     public void aggiungiAssegnazione(Assegnazione assegnazione) {
@@ -50,11 +50,11 @@ public class Scuola {
         return assegnazioni;
     }
 
-    public Collection<Classe> getTutteLeClassi() {
+    public Collection<Classe> getTutteClassi() {
         return classi.values();
     }
 
-    public Collection<Docente> getTuttiIDocenti() {
+    public Collection<Docente> getTuttiDocenti() {
         return docenti.values();
     }
 }

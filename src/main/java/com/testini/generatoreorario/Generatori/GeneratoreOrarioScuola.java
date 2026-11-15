@@ -12,323 +12,339 @@ public class GeneratoreOrarioScuola {
     private final int giorni = GiorniSettimana.GIORNI_SCOLASTICI;
     private final int ore = GiorniSettimana.ORE_AL_GIORNO;
     private final int TUTTI = (1 << (giorni * ore)) - 1;
-    private final Random rand = new Random();
+    private final Random random = new Random();
 
-    private Map<Docente, Integer> bitDoc;
-    private Map<Docente, Integer> bitLiberi;
-    private Map<Classe, Integer> bitCla;
-    private Map<Classe, Lezione[][][]> orari;
+    private Map<Docente, Integer> bitmaskDocenti;
+    private Map<Docente, Integer> bitmaskOreNonDisponibili;
+    private Map<Classe, Integer> bitmaskClassi;
+    private Map<Classe, Lezione[][][]> orariClassi;
 
-    private record Gruppo(List<Docente> doc, Classe cl, Materia mat, int ore) {}
-    private record Req(List<Docente> doc, Classe cl, Materia mat) {}
+    private record Gruppo(List<Docente> docenti, Classe classe, Materia materia, int ore) {}
+    private record Richiesta(List<Docente> docenti, Classe classe, Materia materia) {}
 
     public GeneratoreOrarioScuola(Scuola scuola) {
         this.scuola = scuola;
     }
 
-    private int bit(int o, int g) {
-        return 1 << (g * ore + o);
+    // converte [ore][giorno] in bitmask
+    private int bit(int ora, int giorno) {
+        return 1 << (giorno * this.ore + ora);
     }
 
-    private int vietati(Docente d) {
-        int occ = bitDoc.getOrDefault(d, 0);
-        int v = occ | bitLiberi.getOrDefault(d, 0);
-        int maxCons = d.getOreMaxConsecutive();
-        int maskG = (1 << ore) - 1;
+    // calcola gli slot in cui il docente non puo essere assegnato
+    private int vietati(Docente docente) {
+        int slotOccupati = bitmaskDocenti.getOrDefault(docente, 0);
+        int slotVietati = slotOccupati | bitmaskOreNonDisponibili.getOrDefault(docente, 0);
+        int maxOreConsecutive = docente.getOreMaxConsecutive();
+        int mascheraGiorno = (1 << ore) - 1;
         for (int g = 0; g < giorni; g++) {
-            int day = (occ >> (g * ore)) & maskG;
-            if (Integer.bitCount(day) >= d.getMaxOreGiorno(GiorniSettimana.values()[g])) {
-                v |= maskG << (g * ore);
-            } else if (maxCons < ore) {
+            int bitmaskGiorno = (slotOccupati >> (g * ore)) & mascheraGiorno;
+            if (Integer.bitCount(bitmaskGiorno) >= docente.getMaxOreGiorno(GiorniSettimana.values()[g])) {
+                slotVietati |= mascheraGiorno << (g * ore);
+            } else if (maxOreConsecutive < ore) {
                 for (int o = 0; o < ore; o++) {
-                    if ((day & (1 << o)) == 0 && maxConsecutive(day | (1 << o)) > maxCons) {
-                        v |= bit(o, g);
+                    if ((bitmaskGiorno & (1 << o)) == 0 && maxConsecutive(bitmaskGiorno | (1 << o)) > maxOreConsecutive) {
+                        slotVietati |= bit(o, g);
                     }
                 }
             }
         }
-        return v;
+        return slotVietati;
     }
 
-    private int maxConsecutive(int day) {
-        int max = 0, cur = 0;
-        for (int o = 0; o < ore; o++) {
-            cur = ((day & (1 << o)) != 0) ? cur + 1 : 0;
-            if (cur > max) max = cur;
+    // calcola le ore consecutive massime
+    private int maxConsecutive(int bitmaskGiorno) {
+        int maxConsecutive = 0, consecutiveCorrenti = 0;
+        for (int ora = 0; ora < ore; ora++) {
+            consecutiveCorrenti = ((bitmaskGiorno & (1 << ora)) != 0) ? consecutiveCorrenti + 1 : 0;
+            if (consecutiveCorrenti > maxConsecutive) maxConsecutive = consecutiveCorrenti;
         }
-        return max;
+        return maxConsecutive;
     }
 
-    private int liberi(Req r) {
-        int occ = bitCla.getOrDefault(r.cl, 0);
-        for (Docente d: r.doc) {
-            occ |= vietati(d);
+    // calcola gli slot liberi
+    private int liberi(Richiesta richiesta) {
+        int slotOccupati = bitmaskClassi.getOrDefault(richiesta.classe, 0);
+        for (Docente d : richiesta.docenti) {
+            slotOccupati |= vietati(d);
         }
-        return ~occ & TUTTI;
+        return ~slotOccupati & TUTTI;
     }
 
-    private int[] scegliSlot(Req r, int bits) {
-        int adj = 0, maskG = (1 << ore) - 1;
-        for (Docente d : r.doc) {
+    // seleziona uno slot disponibile dalla bitmask
+    private int[] scegliSlot(Richiesta richiesta, int bitmaskSlotDisponibili) {
+        int bitmaskSlotAdiacenti = 0, mascheraGiorno = (1 << ore) - 1;
+        for (Docente d : richiesta.docenti) {
             if (d.getOreMinConsecutive() > 1) {
-                int occ = bitDoc.getOrDefault(d, 0);
+                int slotOccupati = bitmaskDocenti.getOrDefault(d, 0);
                 for (int g = 0; g < giorni; g++) {
-                    int day = (occ >> (g * ore)) & maskG;
-                    adj |= (((day << 1) | (day >> 1)) & maskG) << (g * ore);
+                    int bitmaskGiorno = (slotOccupati >> (g * ore)) & mascheraGiorno;
+                    bitmaskSlotAdiacenti |= (((bitmaskGiorno << 1) | (bitmaskGiorno >> 1)) & mascheraGiorno) << (g * ore);
                 }
             }
         }
-        int pref = bits & adj;
-        return casuale(pref != 0 ? pref : bits);
+        int slotPreferiti = bitmaskSlotDisponibili & bitmaskSlotAdiacenti;
+        return casuale(slotPreferiti != 0 ? slotPreferiti : bitmaskSlotDisponibili);
     }
 
-    private int[] casuale(int bits) {
-        int n = rand.nextInt(Integer.bitCount(bits));
-        for (int k = 0; k < n; k++) {
-            bits &= bits - 1;
+    // seleziona casualmente un bit e lo rende una coppia ora:giorno
+    private int[] casuale(int bitmaskSlot) {
+        int indiceCasuale = random.nextInt(Integer.bitCount(bitmaskSlot));
+        for (int k = 0; k < indiceCasuale; k++) {
+            bitmaskSlot &= bitmaskSlot - 1;
         }
-        int p = Integer.numberOfTrailingZeros(bits);
-        return new int[]{p % ore, p / ore};
+        int posizioneBit = Integer.numberOfTrailingZeros(bitmaskSlot);
+        return new int[]{posizioneBit % ore, posizioneBit / ore};
     }
 
-    private List<int[]> tutti(int bits) {
-        List<int[]> l = new ArrayList<>();
-        while (bits != 0) {
-            int p = Integer.numberOfTrailingZeros(bits);
-            l.add(new int[]{p % ore, p / ore});
-            bits &= bits - 1;
+    // converte tutti i bit in coppie ore:giorno
+    private List<int[]> tutti(int bitmaskSlot) {
+        List<int[]> listaSlot = new ArrayList<>();
+        while (bitmaskSlot != 0) {
+            int posizioneBit = Integer.numberOfTrailingZeros(bitmaskSlot);
+            listaSlot.add(new int[]{
+                    posizioneBit % ore, posizioneBit / ore
+            });
+            bitmaskSlot &= bitmaskSlot - 1;
         }
-        return l;
+        return listaSlot;
     }
 
-    private void assegna(Req r, int o, int g) {
-        int b = bit(o, g);
-        Lezione[] lez = new Lezione[r.doc.size()];
-        for (int i = 0; i < r.doc.size(); i++) {
-            Docente d = r.doc.get(i);
-            lez[i] = new Lezione(d, r.mat, r.cl);
-            bitDoc.merge(d, b, (a, v) -> a | v);
+    // crea le matrici Lezione[][] per ogni docente e aggiorna le bitmask
+    private void assegna(Richiesta richiesta, int ora, int giorno) {
+        int mascheraSlot = bit(ora, giorno);
+        Lezione[] lezioniSlot = new Lezione[richiesta.docenti.size()];
+        for (int i = 0; i < richiesta.docenti.size(); i++) {
+            Docente docente = richiesta.docenti.get(i);
+            lezioniSlot[i] = new Lezione(docente, richiesta.materia, richiesta.classe);
+            bitmaskDocenti.merge(docente, mascheraSlot, (precedente, nuovo) -> precedente | nuovo);
         }
-        orari.get(r.cl)[o][g] = lez;
-        bitCla.merge(r.cl, b, (a, v) -> a | v);
+        orariClassi.get(richiesta.classe)[ora][giorno] = lezioniSlot;
+        bitmaskClassi.merge(richiesta.classe, mascheraSlot, (precedente, nuovo) -> precedente | nuovo);
     }
 
-    private Req rimuovi(Classe cl, int o, int g) {
-        Lezione[] lez = orari.get(cl)[o][g];
-        if (lez == null || lez.length == 0) {
+
+    // rimuove una lezione
+    private Richiesta rimuovi(Classe classe, int ora, int giorno) {
+        Lezione[] lezioniSlot = orariClassi.get(classe)[ora][giorno];
+        if (lezioniSlot == null || lezioniSlot.length == 0) {
             return null;
         }
-        int b = bit(o, g);
-        List<Docente> doc = new ArrayList<>();
-        for (Lezione l: lez) {
-            Docente d = l.getDocente();
-            doc.add(d);
-            bitDoc.put(d, bitDoc.get(d) & ~b);
+        int mascheraSlot = bit(ora, giorno);
+        List<Docente> docentiLezione = new ArrayList<>();
+        for (Lezione l : lezioniSlot) {
+            Docente docente = l.getDocente();
+            docentiLezione.add(docente);
+            bitmaskDocenti.put(docente, bitmaskDocenti.get(docente) & ~mascheraSlot);
         }
-        orari.get(cl)[o][g] = null;
-        bitCla.put(cl, bitCla.get(cl) & ~b);
-        return new Req(doc, cl, lez[0].getMateria());
+        orariClassi.get(classe)[ora][giorno] = null;
+        bitmaskClassi.put(classe, bitmaskClassi.get(classe) & ~mascheraSlot);
+        return new Richiesta(docentiLezione, classe, lezioniSlot[0].getMateria());
     }
 
+    // genera l'orario
     public void generaOrario() {
         List<Gruppo> gruppi = identificaGruppi();
-        int obiettivo = gruppi.stream().mapToInt(Gruppo::ore).sum();
-        for (Docente d: scuola.getTuttiIDocenti()) {
+        int oreObiettivo = gruppi.stream().mapToInt(Gruppo::ore).sum();
+        for (Docente d : scuola.getTuttiDocenti()) {
             if (d.getOreTotali() > giorni * ore) {
-                obiettivo -= (d.getOreTotali() - giorni * ore);
+                oreObiettivo -= (d.getOreTotali() - giorni * ore);
             }
         }
 
-        int best = -1, bestPen = Integer.MAX_VALUE;
-        Map<Classe, Lezione[][][]> bestOrario = null;
+        int migliorPunteggio = -1, migliorPenalita = Integer.MAX_VALUE;
+        Map<Classe, Lezione[][][]> migliorOrario = null;
 
         for (int t = 0; t < MAX_TENTATIVI; t++) {
-            int p = tentativo(gruppi);
-            int pen = (p >= obiettivo) ? penalitaMinCons() : Integer.MAX_VALUE;
-            if (p >= obiettivo && pen == 0) {
+            int orePiazzate = tentativo(gruppi);
+            int penalita = (orePiazzate >= oreObiettivo) ? penalitaMinCons() : Integer.MAX_VALUE;
+            if (orePiazzate >= oreObiettivo && penalita == 0) {
                 copiaFinale();
                 return;
             }
-            if (p > best || (p == best && pen < bestPen)) {
-                best = p;
-                bestPen = pen;
-                bestOrario = copiaOrari();
+            if (orePiazzate > migliorPunteggio || (orePiazzate == migliorPunteggio && penalita < migliorPenalita)) {
+                migliorPunteggio = orePiazzate;
+                migliorPenalita = penalita;
+                migliorOrario = copiaOrari();
             }
         }
 
-        if (bestOrario != null) {
-            orari = bestOrario;
+        if (migliorOrario != null) {
+            orariClassi = migliorOrario;
             copiaFinale();
         }
     }
 
+    // prova ad assegnare una lezione
     private int tentativo(List<Gruppo> gruppi) {
-        bitDoc = new HashMap<>();
-        for (Docente d: scuola.getTuttiIDocenti()) {
-            bitDoc.put(d, 0);
+        bitmaskDocenti = new HashMap<>();
+        for (Docente d : scuola.getTuttiDocenti()) {
+            bitmaskDocenti.put(d, 0);
         }
 
-        bitCla = new HashMap<>();
-        orari = new HashMap<>();
-        for (Classe c: scuola.getTutteLeClassi()) {
-            bitCla.put(c, 0);
-            orari.put(c, new Lezione[ore][giorni][]);
+        bitmaskClassi = new HashMap<>();
+        orariClassi = new HashMap<>();
+        for (Classe c : scuola.getTutteClassi()) {
+            bitmaskClassi.put(c, 0);
+            orariClassi.put(c, new Lezione[ore][giorni][]);
         }
 
-        bitLiberi = new HashMap<>();
-        for (Docente d: scuola.getTuttiIDocenti()) {
-            int m = 0;
-            for (GiorniSettimana gl: d.getGiorniLiberi()) {
-                int gi = gl.ordinal();
-                if (gi < giorni) {
+        bitmaskOreNonDisponibili = new HashMap<>();
+        for (Docente d : scuola.getTuttiDocenti()) {
+            int mascheraIndisponibilita = 0;
+            for (GiorniSettimana gl : d.getGiorniLiberi()) {
+                int indiceGiorno = gl.ordinal();
+                if (indiceGiorno < giorni) {
                     for (int o = 0; o < ore; o++) {
-                        m |= bit(o, gi);
+                        mascheraIndisponibilita |= bit(o, indiceGiorno);
                     }
                 }
             }
             if (!d.isPuoPrimaOra()) {
-                for (int g = 0; g < giorni; g++) m |= bit(0, g);
+                for (int g = 0; g < giorni; g++) mascheraIndisponibilita |= bit(0, g);
             }
             if (!d.isPuoUltimaOra()) {
-                for (int g = 0; g < giorni; g++) m |= bit(ore - 1, g);
+                for (int g = 0; g < giorni; g++) mascheraIndisponibilita |= bit(ore - 1, g);
             }
-            bitLiberi.put(d, m);
+            bitmaskOreNonDisponibili.put(d, mascheraIndisponibilita);
         }
 
-        List<Req> richieste = new ArrayList<>();
-        for (Gruppo g: gruppi) {
+        List<Richiesta> richieste = new ArrayList<>();
+        for (Gruppo g : gruppi) {
             for (int i = 0; i < g.ore; i++) {
-                richieste.add(new Req(g.doc, g.cl, g.mat));
+                richieste.add(new Richiesta(g.docenti, g.classe, g.materia));
             }
         }
-        Collections.shuffle(richieste, rand);
-        richieste.sort(Comparator.comparingInt(r -> Integer.bitCount(liberi(r))));
+        Collections.shuffle(richieste, random);
+        richieste.sort(Comparator.comparingInt(richiesta -> Integer.bitCount(liberi(richiesta))));
 
-        int piazzati = 0;
-        List<Req> fallite = new ArrayList<>();
-        for (Req r: richieste) {
-            int l = liberi(r);
-            if (l != 0) {
-                int[] s = scegliSlot(r, l);
-                assegna(r, s[0], s[1]);
-                piazzati++;
+        int orePiazzate = 0;
+        List<Richiesta> richiesteFallite = new ArrayList<>();
+        for (Richiesta r : richieste) {
+            int slotLiberi = liberi(r);
+            if (slotLiberi != 0) {
+                int[] slotScelto = scegliSlot(r, slotLiberi);
+                assegna(r, slotScelto[0], slotScelto[1]);
+                orePiazzate++;
             } else {
-                fallite.add(r);
+                richiesteFallite.add(r);
             }
         }
 
-        for (int iter = 0; iter < MAX_SCAMBI && !fallite.isEmpty(); iter++) {
-            Req r = fallite.get(rand.nextInt(fallite.size()));
-            int docViet = 0;
-            for (Docente d: r.doc) {
-                docViet |= vietati(d);
+        for (int iter = 0; iter < MAX_SCAMBI && !richiesteFallite.isEmpty(); iter++) {
+            Richiesta richiestaCorrente = richiesteFallite.get(random.nextInt(richiesteFallite.size()));
+            int slotVietatiDocenti = 0;
+            for (Docente d : richiestaCorrente.docenti) {
+                slotVietatiDocenti |= vietati(d);
             }
-            int cand = bitCla.getOrDefault(r.cl, 0) & ~docViet & TUTTI;
-            List<int[]> slots = tutti(cand);
-            Collections.shuffle(slots, rand);
+            int bitmaskCandidati = bitmaskClassi.getOrDefault(richiestaCorrente.classe, 0) & ~slotVietatiDocenti & TUTTI;
+            List<int[]> listaSlotCandidati = tutti(bitmaskCandidati);
+            Collections.shuffle(listaSlotCandidati, random);
 
-            boolean ok = false;
-            for (int[] s: slots) {
-                Req spost = rimuovi(r.cl, s[0], s[1]);
-                int lib = liberi(spost);
-                if (lib != 0) {
-                    int[] ns = casuale(lib);
-                    assegna(spost, ns[0], ns[1]);
-                    assegna(r, s[0], s[1]);
-                    fallite.remove(r);
-                    piazzati++;
-                    ok = true;
+            boolean scambioRiuscito = false;
+            for (int[] s : listaSlotCandidati) {
+                Richiesta richiestaSpostata = rimuovi(richiestaCorrente.classe, s[0], s[1]);
+                int slotLiberiSpostata = liberi(richiestaSpostata);
+                if (slotLiberiSpostata != 0) {
+                    int[] nuovoSlot = casuale(slotLiberiSpostata);
+                    assegna(richiestaSpostata, nuovoSlot[0], nuovoSlot[1]);
+                    assegna(richiestaCorrente, s[0], s[1]);
+                    richiesteFallite.remove(richiestaCorrente);
+                    orePiazzate++;
+                    scambioRiuscito = true;
                     break;
                 } else {
-                    assegna(spost, s[0], s[1]);
+                    assegna(richiestaSpostata, s[0], s[1]);
                 }
             }
 
-            if (!ok) {
-                for (Docente d: r.doc) {
-                    if (ok) {
+            if (!scambioRiuscito) {
+                for (Docente d : richiestaCorrente.docenti) {
+                    if (scambioRiuscito) {
                         break;
                     }
-                    int conf = bitDoc.get(d) & ~bitCla.getOrDefault(r.cl, 0) & TUTTI;
-                    for (int[] cs: tutti(conf)) {
-                        Lezione lez = trovaLezioneDocente(d, cs[0], cs[1]);
-                        if (lez == null) {
+                    int bitmaskConflitti = bitmaskDocenti.get(d) & ~bitmaskClassi.getOrDefault(richiestaCorrente.classe, 0) & TUTTI;
+                    for (int[] cs : tutti(bitmaskConflitti)) {
+                        Lezione lezioneInConflitto = trovaLezioneDocente(d, cs[0], cs[1]);
+                        if (lezioneInConflitto == null) {
                             continue;
                         }
-                        Req spost = rimuovi(lez.getClasse(), cs[0], cs[1]);
-                        int lib = liberi(spost);
-                        if (lib == 0) {
-                            assegna(spost, cs[0], cs[1]);
+                        Richiesta richiestaSpostata = rimuovi(lezioneInConflitto.getClasse(), cs[0], cs[1]);
+                        int slotLiberiSpostata = liberi(richiestaSpostata);
+                        if (slotLiberiSpostata == 0) {
+                            assegna(richiestaSpostata, cs[0], cs[1]);
                             continue;
                         }
-                        int[] ns = casuale(lib);
-                        assegna(spost, ns[0], ns[1]);
-                        int lr = liberi(r);
-                        if (lr != 0) {
-                            int[] sr = casuale(lr);
-                            assegna(r, sr[0], sr[1]);
-                            fallite.remove(r);
-                            piazzati++;
-                            ok = true;
+                        int[] nuovoSlot = casuale(slotLiberiSpostata);
+                        assegna(richiestaSpostata, nuovoSlot[0], nuovoSlot[1]);
+                        int slotLiberiRichiesta = liberi(richiestaCorrente);
+                        if (slotLiberiRichiesta != 0) {
+                            int[] slotRichiesta = casuale(slotLiberiRichiesta);
+                            assegna(richiestaCorrente, slotRichiesta[0], slotRichiesta[1]);
+                            richiesteFallite.remove(richiestaCorrente);
+                            orePiazzate++;
+                            scambioRiuscito = true;
                             break;
                         } else {
-                            rimuovi(lez.getClasse(), ns[0], ns[1]);
-                            assegna(spost, cs[0], cs[1]);
+                            rimuovi(lezioneInConflitto.getClasse(), nuovoSlot[0], nuovoSlot[1]);
+                            assegna(richiestaSpostata, cs[0], cs[1]);
                         }
                     }
                 }
             }
         }
-        return piazzati;
+        return orePiazzate;
     }
 
+    //
     private int penalitaMinCons() {
-        int pen = 0, maskG = (1 << ore) - 1;
-        for (Docente d : scuola.getTuttiIDocenti()) {
-            int minC = d.getOreMinConsecutive();
-            if (minC <= 1) continue;
-            int occ = bitDoc.getOrDefault(d, 0);
+        int penalitaTotale = 0, mascheraGiorno = (1 << ore) - 1;
+        for (Docente d : scuola.getTuttiDocenti()) {
+            int oreMinConsecutive = d.getOreMinConsecutive();
+            if (oreMinConsecutive <= 1) continue;
+            int slotOccupati = bitmaskDocenti.getOrDefault(d, 0);
             for (int g = 0; g < giorni; g++) {
-                int day = (occ >> (g * ore)) & maskG;
-                int run = 0;
+                int bitmaskGiorno = (slotOccupati >> (g * ore)) & mascheraGiorno;
+                int oreConsecutive = 0;
                 for (int o = 0; o <= ore; o++) {
-                    if (o < ore && (day & (1 << o)) != 0) {
-                        run++;
-                    } else if (run > 0) {
-                        if (run < minC) pen += (minC - run);
-                        run = 0;
+                    if (o < ore && (bitmaskGiorno & (1 << o)) != 0) {
+                        oreConsecutive++;
+                    } else if (oreConsecutive > 0) {
+                        if (oreConsecutive < oreMinConsecutive) penalitaTotale += (oreMinConsecutive - oreConsecutive);
+                        oreConsecutive = 0;
                     }
                 }
             }
         }
-        return pen;
+        return penalitaTotale;
     }
 
+    // Rileva le compresenze
     private List<Gruppo> identificaGruppi() {
-        Map<String, List<Assegnazione>> mappa = new LinkedHashMap<>();
-        for (Assegnazione a: scuola.getAssegnazioni()) {
+        Map<String, List<Assegnazione>> mappaAssegnazioni = new LinkedHashMap<>();
+        for (Assegnazione a : scuola.getAssegnazioni()) {
             String chiave = a.getClasse().getNomeCompleto() + "|" + a.getMateria().getNomeMateria();
-            mappa.computeIfAbsent(chiave, k -> new ArrayList<>()).add(a);
+            mappaAssegnazioni.computeIfAbsent(chiave, chiaveMappa -> new ArrayList<>()).add(a);
         }
 
         List<Gruppo> gruppi = new ArrayList<>();
-        for (List<Assegnazione> lista: mappa.values()) {
+        for (List<Assegnazione> lista : mappaAssegnazioni.values()) {
             if (lista.size() == 1) {
-                Assegnazione a = lista.getFirst();
-                gruppi.add(new Gruppo(List.of(a.getDocente()), a.getClasse(), a.getMateria(), a.getOreSettimanali()));
+                Assegnazione primaAssegnazione = lista.getFirst();
+                gruppi.add(new Gruppo(List.of(primaAssegnazione.getDocente()), primaAssegnazione.getClasse(), primaAssegnazione.getMateria(), primaAssegnazione.getOreSettimanali()));
                 continue;
             }
-            int max = lista.stream().mapToInt(Assegnazione::getOreSettimanali).max().orElse(0);
-            int min = lista.stream().mapToInt(Assegnazione::getOreSettimanali).min().orElse(0);
-            List<Docente> doc = lista.stream().map(Assegnazione::getDocente).toList();
-            Assegnazione p = lista.getFirst();
-            if (min == max) {
-                gruppi.add(new Gruppo(doc, p.getClasse(), p.getMateria(), max));
+            int oreMassime = lista.stream().mapToInt(Assegnazione::getOreSettimanali).max().orElse(0);
+            int oreMinime = lista.stream().mapToInt(Assegnazione::getOreSettimanali).min().orElse(0);
+            List<Docente> docentiGruppo = lista.stream().map(Assegnazione::getDocente).toList();
+            Assegnazione primaAssegnazione = lista.getFirst();
+            if (oreMinime == oreMassime) {
+                gruppi.add(new Gruppo(docentiGruppo, primaAssegnazione.getClasse(), primaAssegnazione.getMateria(), oreMassime));
             } else {
-                gruppi.add(new Gruppo(doc, p.getClasse(), p.getMateria(), min));
+                gruppi.add(new Gruppo(docentiGruppo, primaAssegnazione.getClasse(), primaAssegnazione.getMateria(), oreMinime));
                 for (Assegnazione a : lista) {
-                    if (a.getOreSettimanali() > min) {
-                        gruppi.add(new Gruppo(List.of(a.getDocente()), a.getClasse(), a.getMateria(), a.getOreSettimanali() - min));
+                    if (a.getOreSettimanali() > oreMinime) {
+                        gruppi.add(new Gruppo(List.of(a.getDocente()), a.getClasse(), a.getMateria(), a.getOreSettimanali() - oreMinime));
                     }
                 }
             }
@@ -336,12 +352,13 @@ public class GeneratoreOrarioScuola {
         return gruppi;
     }
 
-    private Lezione trovaLezioneDocente(Docente doc, int o, int g) {
-        for (Classe c: scuola.getTutteLeClassi()) {
-            Lezione[][][] or = orari.get(c);
-            if (or != null && or[o][g] != null) {
-                for (Lezione l : or[o][g]) {
-                    if (l.getDocente().equals(doc)) {
+    // Trova tutte le lezioni di un docente in [ora][giorno]
+    private Lezione trovaLezioneDocente(Docente docente, int ora, int giorno) {
+        for (Classe c : scuola.getTutteClassi()) {
+            Lezione[][][] orarioClasse = orariClassi.get(c);
+            if (orarioClasse != null && orarioClasse[ora][giorno] != null) {
+                for (Lezione l : orarioClasse[ora][giorno]) {
+                    if (l.getDocente().equals(docente)) {
                         return l;
                     }
                 }
@@ -350,58 +367,61 @@ public class GeneratoreOrarioScuola {
         return null;
     }
 
+    // Coapia l'orario attuale (la matrice 3d serve per le compresenze)
     private Map<Classe, Lezione[][][]> copiaOrari() {
-        Map<Classe, Lezione[][][]> copia = new HashMap<>();
-        for (Classe c: scuola.getTutteLeClassi()) {
-            Lezione[][][] orig = orari.get(c);
-            Lezione[][][] cp = new Lezione[ore][giorni][];
+        Map<Classe, Lezione[][][]> mappaCopia = new HashMap<>();
+        for (Classe c : scuola.getTutteClassi()) {
+            Lezione[][][] orarioOriginale = orariClassi.get(c);
+            Lezione[][][] orarioCopiato = new Lezione[ore][giorni][];
             for (int o = 0; o < ore; o++) {
                 for (int g = 0; g < giorni; g++) {
-                    if (orig[o][g] != null) {
-                        cp[o][g] = orig[o][g].clone();
+                    if (orarioOriginale[o][g] != null) {
+                        orarioCopiato[o][g] = orarioOriginale[o][g].clone();
                     }
                 }
             }
-            copia.put(c, cp);
+            mappaCopia.put(c, orarioCopiato);
         }
-        return copia;
+        return mappaCopia;
     }
 
+    //
     private void copiaFinale() {
-        for (Classe c: scuola.getTutteLeClassi()) {
-            Lezione[][] tab = new Lezione[ore][giorni];
-            Lezione[][][] or = orari.get(c);
+        for (Classe c : scuola.getTutteClassi()) {
+            Lezione[][] tabellaLezioni = new Lezione[ore][giorni];
+            Lezione[][][] orarioClasse = orariClassi.get(c);
             for (int o = 0; o < ore; o++) {
                 for (int g = 0; g < giorni; g++) {
-                    if (or[o][g] != null && or[o][g].length > 0) {
-                        List<Docente> dc = Arrays.stream(or[o][g]).map(Lezione::getDocente).toList();
-                        tab[o][g] = new Lezione(dc, or[o][g][0].getMateria(), c);
+                    if (orarioClasse[o][g] != null && orarioClasse[o][g].length > 0) {
+                        List<Docente> docentiCompresenza = Arrays.stream(orarioClasse[o][g]).map(Lezione::getDocente).toList();
+                        tabellaLezioni[o][g] = new Lezione(docentiCompresenza, orarioClasse[o][g][0].getMateria(), c);
                     }
                 }
             }
-            c.setTabellaLezioni(tab);
+            c.setTabellaLezioni(tabellaLezioni);
         }
     }
 
+    // Recupera l'orario di un docente dagli orari delle classi
     public Lezione[][] estraiOrarioDocente(Docente docente) {
-        Lezione[][] od = new Lezione[ore][giorni];
-        for (Classe c: scuola.getTutteLeClassi()) {
-            Lezione[][][] or = orari.get(c);
-            if (or == null) {
+        Lezione[][] orarioDocente = new Lezione[ore][giorni];
+        for (Classe c : scuola.getTutteClassi()) {
+            Lezione[][][] orarioClasse = orariClassi.get(c);
+            if (orarioClasse == null) {
                 continue;
             }
             for (int o = 0; o < ore; o++) {
                 for (int g = 0; g < giorni; g++) {
-                    if (or[o][g] != null) {
-                        for (Lezione l: or[o][g]) {
+                    if (orarioClasse[o][g] != null) {
+                        for (Lezione l : orarioClasse[o][g]) {
                             if (l.getDocente().equals(docente)) {
-                                od[o][g] = l;
+                                orarioDocente[o][g] = l;
                             }
                         }
                     }
                 }
             }
         }
-        return od;
+        return orarioDocente;
     }
 }

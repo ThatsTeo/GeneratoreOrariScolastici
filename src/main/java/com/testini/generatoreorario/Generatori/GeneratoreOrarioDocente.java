@@ -2,7 +2,7 @@ package com.testini.generatoreorario.Generatori;
 
 import com.testini.generatoreorario.ClassiBasi.*;
 
-// Accesso e visualizzazione dell'orario di un singolo docente
+// Orario di un singolo docente
 public class GeneratoreOrarioDocente {
     private final Docente docente;
     private final GeneratoreOrarioScuola generatoreScuola;

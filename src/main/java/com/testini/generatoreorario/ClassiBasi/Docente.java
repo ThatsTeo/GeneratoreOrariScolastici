@@ -2,7 +2,7 @@ package com.testini.generatoreorario.ClassiBasi;
 
 import java.util.*;
 
-// Rappresenta un docente
+// Classe docente
 public class Docente {
     private String nomeCognome;
     private List<Assegnazione> assegnazioni;
@@ -28,7 +28,7 @@ public class Docente {
         this.assegnazioni.add(new Assegnazione(this, classe, materia, ore));
     }
 
-    // Calcola il totale delle ore settimanale del docente
+    // Calcola il totale delle ore settimanali del docente
     public int getOreTotali() {
         int totale = 0;
         for (Assegnazione a : assegnazioni) {
@@ -73,8 +73,8 @@ public class Docente {
     public int getOreMaxConsecutive() { return oreMaxConsecutive; }
     public void setOreMaxConsecutive(int oreMaxConsecutive) { this.oreMaxConsecutive = oreMaxConsecutive; }
 
-    public int getMaxOreGiorno(GiorniSettimana g) {
-        return maxOreGiorno.getOrDefault(g, GiorniSettimana.ORE_AL_GIORNO);
+    public int getMaxOreGiorno(GiorniSettimana giorno) {
+        return maxOreGiorno.getOrDefault(giorno, GiorniSettimana.ORE_AL_GIORNO);
     }
 
     public void setMaxOreGiorno(Map<GiorniSettimana, Integer> maxOreGiorno) {
@@ -82,10 +82,10 @@ public class Docente {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Docente docente = (Docente) o;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Docente docente = (Docente) obj;
         return Objects.equals(nomeCognome, docente.nomeCognome);
     }
 

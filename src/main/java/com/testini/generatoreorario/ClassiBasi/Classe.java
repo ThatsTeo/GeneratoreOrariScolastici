@@ -84,10 +84,10 @@ public class Classe {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Classe classe = (Classe) o;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Classe classe = (Classe) obj;
         return anno == classe.anno && sezione == classe.sezione && Objects.equals(indirizzo, classe.indirizzo);
     }
 

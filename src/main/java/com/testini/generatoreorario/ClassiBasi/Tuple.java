@@ -38,8 +38,8 @@ public class Tuple<T1, T2, T3> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Tuple<?, ?, ?> tuple)) return false;
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Tuple<?, ?, ?> tuple)) return false;
         return Objects.equals(t1, tuple.t1) && Objects.equals(t2, tuple.t2) && Objects.equals(t3, tuple.t3);
     }
 
