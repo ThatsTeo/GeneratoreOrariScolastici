@@ -24,7 +24,7 @@ title Calendario delle Attività - WBS Generatore Orari Scolastici
 [2.4 Caso senza soluzione (Testini)] as [2.4] starts 2026-11-07 and ends 2026-11-09 and is colored in #00A86B
 
 -- Fase 3: Interfaccia grafica --
-[3.1 Bozza grafica Swing (Gorreja)] as [3.1] starts 2026-10-27 and ends 2026-10-28 and is colored in #E67E22
+[3.1 Bozza grafica JavaFX (Gorreja)] as [3.1] starts 2026-10-27 and ends 2026-10-28 and is colored in #E67E22
 [3.2 Finestra principale (Gorreja)] as [3.2] starts 2026-10-31 and ends 2026-11-01 and is colored in #E67E22
 [3.3 Tabella settimanale (Gorreja)] as [3.3] starts 2026-11-01 and ends 2026-11-08 and is colored in #E67E22
 [3.4 Generazione ed errori (Gorreja)] as [3.4] starts 2026-11-08 and ends 2026-11-11 and is colored in #E67E22
@@ -40,7 +40,7 @@ title Calendario delle Attività - WBS Generatore Orari Scolastici
 [5.3 UML e architettura (Marku)] as [5.3] starts 2026-10-27 and ends 2026-11-12 and is colored in #4A69BD
 [5.4 Relazione algoritmo (Testini)] as [5.4] starts 2026-11-11 and ends 2026-11-13 and is colored in #4A69BD
 [5.5 Presentazione applicativo (Gorreja)] as [5.5] starts 2026-11-13 and ends 2026-11-15 and is colored in #4A69BD
-[5.6 Trascrizione IA e consegna (Tutti)] as [5.6] starts 2026-11-15 and ends 2026-11-16 and is colored in #4A69BD
+[5.6 Trascrizione AI e consegna (Tutti)] as [5.6] starts 2026-11-15 and ends 2026-11-16 and is colored in #4A69BD
 
 ' Milestone di consegna finale
 [Consegna finale ordinaria] happens 2026-11-16
