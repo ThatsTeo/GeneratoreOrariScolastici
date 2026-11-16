@@ -83,9 +83,7 @@ public class MainController {
             this.saraceno = this.parser.costruisciScuola();
             this.generatoreSaraceno = null;
         }
-
     }
-
 
     @FXML
     protected void finestraVincoli(ActionEvent event) {
@@ -173,6 +171,49 @@ public class MainController {
             Stage stage = new Stage();
             stage.setTitle("Orario Settimanale Classi");
             stage.setScene(new Scene(root, 800, 560));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    protected void finestraAvvisi(ActionEvent event) {
+        if(ParserCSV.fileCSV == null) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Seleziona un file!");
+            alert.setHeaderText(null);
+            alert.setTitle("File non caricato");
+            alert.showAndWait();
+            return;
+        }
+
+        if(ParserCSV.avvisi.isEmpty() && ParserCSV.errori.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Non sono stati rilevati errori o avvisi!");
+            alert.setHeaderText(null);
+            alert.setTitle("Nessun errore trovato");
+            alert.showAndWait();
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/testini/generatoreorario/AvvisiView.fxml"));
+            Parent root = loader.load();
+
+            AvvisiController controller = loader.getController();
+            var listaAvvisi = ParserCSV.avvisi;
+            var listaErrori = ParserCSV.errori;
+
+            for(String s: listaAvvisi) {
+                controller.txtAreaAvvisi.appendText("[AVVISO]: " + s + '\n' + '\n');
+                System.out.println(s);
+            }
+            for (String s: listaErrori) {
+                controller.txtAreaErrori.appendText("[ERRORE]: " + s + '\n' + '\n');
+                System.err.println(s);
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Errori e Avvisi");
+            stage.setScene(new Scene(root, 460, 400));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

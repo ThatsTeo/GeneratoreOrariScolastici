@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox alignment="CENTER" prefHeight="400.0" prefWidth="460.0" spacing="14.0" style="-fx-background-color: #2b2b2b;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.testini.generatoreorario.GUI.AvvisiController">
+
+    <stylesheets>
+        <URL value="@styles.css" />
+    </stylesheets>
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+
+    <VBox>
+        <Label alignment="TOP_CENTER" text="Lista degli errori e avvisi durante il caricamento del file." textAlignment="CENTER" textFill="WHITE" wrapText="true">
+            <font>
+                <Font name="System Bold Italic" size="19.0" />
+            </font>
+        </Label>
+    </VBox>
+
+    <HBox>
+        <VBox alignment="TOP_CENTER">
+            <Label text="AVVISI" textFill="#ffc43a">
+
+            <font>
+               <Font name="System Bold" size="17.0" />
+            </font></Label>
+            <TextArea fx:id="txtAreaAvvisi" editable="false" prefHeight="200.0" wrapText="true" />
+        </VBox>
+
+        <Separator opacity="0.0" prefWidth="20" />
+
+        <VBox alignment="TOP_CENTER">
+            <Label text="ERRORI" textFill="RED">
+
+            <font>
+               <Font size="17.0" />
+            </font></Label>
+            <TextArea fx:id="txtAreaErrori" editable="false" prefHeight="200.0" wrapText="true" />
+        </VBox>
+    </HBox>
+</VBox>

@@ -30,9 +30,6 @@ public class OrarioClassiController {
     @FXML
     private GridPane grigliaOrario;
 
-    @FXML
-    private Button bottoneEsporta;
-
     private Scuola scuola;
 
     @FXML
@@ -153,9 +150,25 @@ public class OrarioClassiController {
             Classe classe = scuola.getClassi().get(nomeClasse);
 
             if (classe != null) {
-                String nomeFile = classe.getAnno() + classe.getSezione() + classe.getIndirizzo() + "_Orario" + ".csv";
+                String nomeFile = String.valueOf(classe.getAnno()) + classe.getSezione() + classe.getIndirizzo() + "_OrarioCSV" + ".csv";
 
                 if(EsportatoreCSV.esportaOrarioClasseCSV(classe, new File(nomeFile))) System.out.println("Esportazione avvenuta!");
+                else System.err.println("Esportazione non avvenuta!");
+            }
+        }
+    }
+
+    @FXML
+    protected void esportaOrarioPDF(ActionEvent e) {
+        String nomeClasse = comboBoxClassi.getValue();
+
+        if (nomeClasse != null && scuola != null) {
+            Classe classe = scuola.getClassi().get(nomeClasse);
+
+            if (classe != null) {
+                String nomeFile = String.valueOf(classe.getAnno()) + classe.getSezione() + classe.getIndirizzo() + "-OrarioPDF" + ".pdf";
+
+                if(EsportatoreCSV.esportaOrarioClassePDF(classe, new File(nomeFile))) System.out.println("Esportazione avvenuta!");
                 else System.err.println("Esportazione non avvenuta!");
             }
         }

@@ -29,12 +29,11 @@
 
         <Region HBox.hgrow="ALWAYS" />
 
-        <Button onAction="#finestraOrariClassi" text="Orari Classi" prefHeight="26.0" prefWidth="146.0" styleClass="generaorarioclassi-button" />
+        <Button onAction="#finestraOrariClassi" prefHeight="26.0" prefWidth="146.0" styleClass="generaorarioclassi-button" text="Orari Classi" />
 
         <Separator opacity="0.0" prefWidth="20" />
 
         <Button onAction="#finestraOrariDocenti" prefHeight="26.0" prefWidth="146.0" styleClass="generaorariodocenti-button" text="Orari Docenti" />
-
     </HBox>
 
     <TableView fx:id="tabellaIniziale" editable="false" prefHeight="400.0" prefWidth="600.0">
@@ -60,5 +59,7 @@
         <ComboBox fx:id="comboBoxDocenti" promptText="Professore" />
         <Separator opacity="0.0" prefHeight="13.0" prefWidth="34.0" />
         <Button onAction="#finestraVincoli" styleClass="modificavincoli-button" text="Modifica i vincoli" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Button text="Avvisi" onAction="#finestraAvvisi" textAlignment="CENTER" styleClass="avvisi-button"/>
     </HBox>
 </VBox>

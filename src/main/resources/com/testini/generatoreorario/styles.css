@@ -64,6 +64,22 @@
     -fx-background-color: #196f3d;
 }
 
+.avvisi-button {
+    -fx-background-color: #ff0000;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.avvisi-button:hover {
+    -fx-backrgound-color: #9e0000;
+}
+
+.avvisi-button:pressed {
+    -fx-background-color: #700000;
+}
+
 /*  OrarioView  */
 .cella-header {
     -fx-background-color: #434850;

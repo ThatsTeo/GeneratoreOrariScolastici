@@ -79,21 +79,6 @@ public class ParserCSV {
         return data;
     }
 
-    public static String[] parseLine(String line) {
-        long countSemicolon = line.chars().filter(ch -> ch == ';').count();
-        long countComma = line.chars().filter(ch -> ch == ',').count();
-        String delim = (countComma > countSemicolon) ? "," : ";";
-        String[] values = parseLine(line, delim);
-        if (values.length < 6) {
-            String alt = delim.equals(";") ? "," : ";";
-            String[] altValues = parseLine(line, alt);
-            if (altValues.length >= 6) {
-                return altValues;
-            }
-        }
-        return values;
-    }
-
     public static String[] parseLine(String line, String delimiter) {
         char delim = delimiter.charAt(0);
         List<String> tokens = new ArrayList<>();
@@ -118,8 +103,8 @@ public class ParserCSV {
         }
         tokens.add(sb.toString().trim());
 
-        while (tokens.size() > 6 && tokens.get(tokens.size() - 1).isEmpty()) {
-            tokens.remove(tokens.size() - 1);
+        while (tokens.size() > 6 && tokens.getLast().isEmpty()) {
+            tokens.removeLast();
         }
 
         return tokens.toArray(new String[0]);
@@ -194,7 +179,7 @@ public class ParserCSV {
             scuola.aggiungiAssegnazione(assegnazione);
         }
 
-        // Segnala eventuali docenti con ore eccessive
+        // Segnala docenti con ore eccessive
         for (Docente d : scuola.getTuttiDocenti()) {
             if (d.getOreTotali() > GiorniSettimana.GIORNI_SCOLASTICI * GiorniSettimana.ORE_AL_GIORNO) {
                 avvisi.add("Docente " + d.getNomeCognome() + " ha " + d.getOreTotali() + " ore (supera il limite di 30 ore).");

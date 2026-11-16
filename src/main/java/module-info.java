@@ -9,6 +9,8 @@ module com.testini.generatoreorario {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.opencsv;
+    requires com.github.librepdf.openpdf;
+    requires java.desktop;
 
     exports com.testini.generatoreorario.GUI;
     opens com.testini.generatoreorario.GUI to javafx.fxml;
