@@ -184,6 +184,7 @@ public class GeneratoreOrarioScuola {
     // genera l'orario
     public void generaOrario() {
         List<Gruppo> gruppi = identificaGruppi();
+
         int oreObiettivo = gruppi.stream().mapToInt(Gruppo::ore).sum();
         for (Docente docente : scuola.getTuttiDocenti()) {
             int maxOreSettimanali = giorni * ore;
@@ -205,8 +206,7 @@ public class GeneratoreOrarioScuola {
                 return;
             }
 
-            boolean trovatoMigliore = (orePiazzate > migliorPunteggio)
-                    || (orePiazzate == migliorPunteggio && penalita < migliorPenalita);
+            boolean trovatoMigliore = (orePiazzate > migliorPunteggio) || (orePiazzate == migliorPunteggio && penalita < migliorPenalita);
 
             if (trovatoMigliore) {
                 migliorPunteggio = orePiazzate;
@@ -224,21 +224,21 @@ public class GeneratoreOrarioScuola {
     // prova ad assegnare
     private int tentativo(List<Gruppo> gruppi) {
         bitmaskDocenti = new HashMap<>();
-        for (Docente docente : scuola.getTuttiDocenti()) {
+        for (Docente docente: scuola.getTuttiDocenti()) {
             bitmaskDocenti.put(docente, 0);
         }
 
         bitmaskClassi = new HashMap<>();
         orariClassi = new HashMap<>();
-        for (Classe classe : scuola.getTutteClassi()) {
+        for (Classe classe: scuola.getTutteClassi()) {
             bitmaskClassi.put(classe, 0);
             orariClassi.put(classe, new Lezione[ore][giorni][]);
         }
 
         bitmaskOreNonDisponibili = new HashMap<>();
-        for (Docente docente : scuola.getTuttiDocenti()) {
+        for (Docente docente: scuola.getTuttiDocenti()) {
             int mascheraIndisponibilita = 0;
-            for (GiorniSettimana gl : docente.getGiorniLiberi()) {
+            for (GiorniSettimana gl: docente.getGiorniLiberi()) {
                 int indiceGiorno = gl.ordinal();
                 if (indiceGiorno < giorni) {
                     for (int o = 0; o < ore; o++) {
@@ -260,7 +260,7 @@ public class GeneratoreOrarioScuola {
         }
 
         List<Richiesta> richieste = new ArrayList<>();
-        for (Gruppo g : gruppi) {
+        for (Gruppo g: gruppi) {
             for (int i = 0; i < g.ore; i++) {
                 richieste.add(new Richiesta(g.docenti, g.classe, g.materia));
             }

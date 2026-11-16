@@ -13,7 +13,9 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.stage.Stage;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 
 public class VincoliController {
 
@@ -24,6 +26,7 @@ public class VincoliController {
     @FXML private Spinner<Integer> oreConsMaxSpinner;
     @FXML private ComboBox<GiorniSettimana> maxOreGiornoCB;
     @FXML private Spinner<Integer> maxOreGiornoSpinner;
+    @FXML private ComboBox<String> giornoLiberoCB;
 
     private Docente docente;
     private Runnable onSave;
@@ -52,6 +55,9 @@ public class VincoliController {
             }
         });
 
+        giornoLiberoCB.getItems().setAll("Nessuno", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì");
+        giornoLiberoCB.getSelectionModel().selectFirst();
+
         primaOraCheck.setSelected(true);
         ultimaOraCheck.setSelected(true);
     }
@@ -70,10 +76,24 @@ public class VincoliController {
                 maxOreGiornoTemporanee.put(g, docente.getMaxOreGiorno(g));
             }
             maxOreGiornoSpinner.getValueFactory().setValue(maxOreGiornoTemporanee.get(maxOreGiornoCB.getValue()));
+
+            int indice = 0; // 0 -> non ha il giorno libero
+            for (int i = 0; i < GIORNI_SCELTA.length; i++) {
+                if (docente.getGiorniLiberi().contains(GIORNI_SCELTA[i])) {
+                    indice = i + 1;
+                    break;
+                }
+            }
+            giornoLiberoCB.getSelectionModel().select(indice);
         } else {
             labelVincoli.setText("Scegli i vincoli");
         }
     }
+
+    private static final GiorniSettimana[] GIORNI_SCELTA = {
+            GiorniSettimana.LUNEDI, GiorniSettimana.MARTEDI, GiorniSettimana.MERCOLEDI,
+            GiorniSettimana.GIOVEDI, GiorniSettimana.VENERDI
+    };
 
     @FXML
     protected void onChiudi(ActionEvent event) {
@@ -85,6 +105,12 @@ public class VincoliController {
             docente.setOreMinConsecutive(oreMinConsecutive);
             docente.setOreMaxConsecutive(oreMaxConsecutive);
             docente.setMaxOreGiorno(maxOreGiornoTemporanee);
+            Set<GiorniSettimana> liberi = EnumSet.noneOf(GiorniSettimana.class);
+            int scelta = giornoLiberoCB.getSelectionModel().getSelectedIndex();
+            if (scelta > 0) {
+                liberi.add(GIORNI_SCELTA[scelta - 1]);
+            }
+            docente.setGiorniLiberi(liberi);
             if (onSave != null) onSave.run();
         }
         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
