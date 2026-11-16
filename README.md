@@ -3,7 +3,7 @@
 ![Java 21](https://img.shields.io/badge/Java-21-orange.svg)
 ![JavaFX](https://img.shields.io/badge/JavaFX-21-blue.svg)
 ![Gradle](https://img.shields.io/badge/Gradle-8.x-green.svg)
-![License](https://img.shields.io/badge/License-MIT-brightgreen.svg)
+![License](https://img.shields.io/badge/License-GPL3-brightgreen.svg)
 ![Status](https://img.shields.io/badge/Status-Completed-success.svg)
 
 Un'applicazione desktop completa, ad alte prestazioni ed estensibile per la **generazione automatizzata degli orari scolastici**, sviluppata in **Java 21** con interfaccia grafica **JavaFX**.
